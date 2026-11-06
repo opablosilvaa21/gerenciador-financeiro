@@ -1,0 +1,14 @@
+{
+  "name": "sobra",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Gerenciador financeiro pessoal que roda direto no navegador.",
+  "scripts": {
+    "test": "node --test \"test/*.test.js\"",
+    "test:e2e": "node test/e2e/run.js",
+    "test:mobile": "node test/e2e/mobile.js"
+  },
+  "devDependencies": {
+    "puppeteer-core": "^24.0.0"
+  }
+}

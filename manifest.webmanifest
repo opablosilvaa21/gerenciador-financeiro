@@ -1,0 +1,30 @@
+{
+  "id": "./",
+  "name": "Sobra",
+  "short_name": "Sobra",
+  "description": "Gerenciador financeiro pessoal. Mostra quanto sobra no fim do mês, e seus dados ficam só no seu aparelho.",
+  "lang": "pt-BR",
+  "dir": "ltr",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#edf1ee",
+  "theme_color": "#edf1ee",
+  "categories": ["finance"],
+  "icons": [
+    { "src": "assets/icone-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "assets/icone-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "assets/icone-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "screenshots": [
+    { "src": "assets/tela-inicio.png", "sizes": "780x1688", "type": "image/png", "form_factor": "narrow", "label": "Início, com a cédula do mês" },
+    { "src": "assets/tela-lancamentos.png", "sizes": "780x1688", "type": "image/png", "form_factor": "narrow", "label": "Lançamentos do mês" }
+  ],
+  "shortcuts": [
+    {
+      "name": "Novo lançamento",
+      "url": "./#/inicio?novo=1",
+      "icons": [{ "src": "assets/icone-192.png", "sizes": "192x192", "type": "image/png" }]
+    }
+  ]
+}
