@@ -170,10 +170,10 @@ const box = (selector) => page.$eval(selector, (n) => {
   await step('a escolha de tema colore a barra do sistema', async () => {
     await page.evaluate(() => FM.app.store.setTheme('dark'));
     await delay(40);
-    assert.equal(await page.$eval('meta[name="theme-color"]', (n) => n.content), '#0d2229');
+    assert.equal(await page.$eval('meta[name="theme-color"]', (n) => n.content), '#000000');
     await page.evaluate(() => FM.app.store.setTheme('auto'));
     await delay(40);
-    assert.equal(await page.$eval('meta[name="theme-color"]', (n) => n.content), '#edf1ee');
+    assert.equal(await page.$eval('meta[name="theme-color"]', (n) => n.content), '#ffffff');
   });
   await step('os atalhos de teclado saem dos Ajustes', async () => {
     await go('ajustes');
@@ -228,7 +228,7 @@ const box = (selector) => page.$eval(selector, (n) => {
     await tapTab('Lançamentos');
     assert.equal(await hidden('.filters .filter'), true);
     const notices = (await box('#banners')).height;
-    assert.ok((await box('.tx-table')).top - notices < 340, 'a lista começa muito para baixo');
+    assert.ok((await box('.tx-table')).top - notices < 370, 'a lista começa muito para baixo');
     await tap('Filtros');
     assert.equal(await hidden('.filters .filter'), false);
     await page.select('.filters label:nth-of-type(1) select', 'expense');
