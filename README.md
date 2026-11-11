@@ -93,10 +93,11 @@ código de envio nem encosta nos dados financeiros.
 - **Painel.** Em `#/admin/instalacoes` (fora do menu): total de aparelhos, ativos em 7 e 30 dias, instalados como
   app, novas instalações por dia e a divisão por sistema, modelo e navegador.
 
-Para ligar: aplique `supabase/migrations/20261111120000_installs.sql` no projeto, siga os dois passos do fim desse
-arquivo para criar o administrador e preencha `supabaseUrl` e `supabaseKey` em `js/config.js` com o endereço e a
-chave **pública** do projeto. A chave `service_role` nunca entra no código. Com os campos vazios, a contagem fica
-desligada.
+O banco é o projeto `sobra-finance` no Supabase (região São Paulo), com a migration de
+`supabase/migrations/20261111120000_installs.sql` já aplicada. `js/config.js` traz o endereço e a chave **pública**
+(`sb_publishable_…`). A chave secreta (`service_role` ou `sb_secret_…`) nunca entra no código, e `npm test` falha se
+aparecer uma. Com `supabaseUrl` e `supabaseKey` vazios, a contagem fica desligada. Para entrar no painel, siga os dois
+passos do fim da migration: criar seu usuário e incluí-lo em `private.admins`.
 
 Limites: no iPhone o modelo exato não é informado (fica "iPhone"), e lá o app instalado guarda dados separados do
 Safari, então o mesmo iPhone pode contar duas vezes. Limpar os dados do navegador também gera um identificador novo.

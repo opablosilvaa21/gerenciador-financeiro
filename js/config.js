@@ -13,7 +13,8 @@
 
   FM.config = {
     appVersion: '1.1.0',
-    supabaseUrl: '',
-    supabaseKey: '',
+    // Projeto "sobra-finance" (região São Paulo). Chave pública: só registra o aparelho e faz login.
+    supabaseUrl: 'https://huidncxxzwpdduoholyg.supabase.co',
+    supabaseKey: 'sb_publishable_wkzegfIBKCw6ikMTYkwhHg_f-Alf2or',
   };
 })(globalThis);
