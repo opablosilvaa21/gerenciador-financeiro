@@ -1,5 +1,5 @@
 /**
- * O que faz o Sobra funcionar como aplicativo: instalar na tela inicial e abrir sem internet.
+ * O que faz o Sobra Finance funcionar como aplicativo: instalar na tela inicial e abrir sem internet.
  * Aberto direto pelo arquivo (file://) nada disso existe, e o resto do app funciona igual.
  */
 (function (root) {
@@ -52,7 +52,7 @@
 
   function showInstructions() {
     openDialog({
-      title: 'Instalar o Sobra',
+      title: 'Instalar o Sobra Finance',
       description: isIos()
         ? 'No Safari, toque em Compartilhar e depois em Adicionar à Tela de Início.'
         : 'No menu do navegador, toque em Instalar aplicativo ou em Adicionar à tela inicial.',
@@ -90,9 +90,72 @@
 
     if ('serviceWorker' in root.navigator) {
       root.addEventListener('load', () => {
-        root.navigator.serviceWorker.register('sw.js').catch((error) => console.warn('Sem modo offline:', error));
+        root.navigator.serviceWorker
+          .register('sw.js')
+          .then((registration) => watchUpdates(registration))
+          .catch((error) => console.warn('Sem modo offline:', error));
       });
     }
+  }
+
+  /* ---------- Atualização automática ---------- */
+
+  const CHECK_EVERY_MS = 30 * 60 * 1000;
+  let updateReady = false;
+  let reloading = false;
+
+  /** Recarregar agora não atrapalha? Nada de formulário aberto nem campo sendo digitado. */
+  function isIdle() {
+    const active = root.document.activeElement;
+    const typing = active && (active.matches?.('input, select, textarea') || active.isContentEditable);
+    return !root.document.querySelector('dialog[open]') && !typing;
+  }
+
+  function reload() {
+    if (reloading) return;
+    reloading = true;
+    root.location.reload();
+  }
+
+  /** A versão nova já está instalada. Os dados ficam no localStorage, então recarregar não perde nada. */
+  function applyUpdate() {
+    if (root.document.visibilityState === 'hidden' || isIdle()) {
+      reload();
+      return;
+    }
+    // A pessoa está no meio de algo: avisa, e aplica sozinho quando ela sair do app ou terminar o que fazia.
+    if (updateReady) return;
+    updateReady = true;
+    notify();
+    const waiting = root.setInterval(() => {
+      if (!isIdle()) return;
+      root.clearInterval(waiting);
+      reload();
+    }, 1000);
+  }
+
+  /**
+   * Cada publicação muda o sw.js (ver BUILD lá). O navegador instala a versão nova, ela assume a página
+   * (controllerchange) e a página se recarrega. Para perceber cedo, confere ao voltar para o app e a cada 30 min.
+   */
+  function watchUpdates(registration) {
+    const sw = root.navigator.serviceWorker;
+    // Na primeira visita o service worker também "assume" a página: isso não é atualização.
+    let controlled = Boolean(sw.controller);
+    sw.addEventListener('controllerchange', () => {
+      if (!controlled) {
+        controlled = true;
+        return;
+      }
+      applyUpdate();
+    });
+
+    const check = () => registration.update().catch(() => {});
+    root.document.addEventListener('visibilitychange', () => {
+      if (root.document.visibilityState === 'visible') check();
+      else if (updateReady) reload();
+    });
+    root.setInterval(check, CHECK_EVERY_MS);
   }
 
   start();
@@ -102,6 +165,8 @@
     showOffer,
     dismissOffer,
     install,
+    updateReady: () => updateReady,
+    applyNow: reload,
     onChange: (listener) => listeners.add(listener),
   };
 })(globalThis);

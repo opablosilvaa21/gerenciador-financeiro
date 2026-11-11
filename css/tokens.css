@@ -1,175 +1,262 @@
 /*
- * Papel-moeda e tinta petróleo. As cores dos gráficos foram validadas para daltonismo
- * contra estas superfícies, em claro e em escuro.
+ * Paleta "Floresta": névoa clara, verde floresta, líquen, menta e âmbar.
+ * O tema claro (névoa) é o padrão; o escuro (floresta) entra quando a pessoa escolhe em Ajustes.
+ * Toda cor do app sai daqui. Os pares de texto e fundo são conferidos por test/contrast.js (WCAG AA).
  */
 @font-face {
-  font-family: 'Bodoni Moda';
-  src: url('../assets/fonts/bodoni-moda.woff2') format('woff2');
-  font-weight: 400 700;
+  font-family: 'Fraunces';
+  src: url('../assets/fonts/fraunces.woff2') format('woff2');
+  font-weight: 100 900;
   font-display: swap;
 }
 @font-face {
-  font-family: 'Public Sans';
-  src: url('../assets/fonts/public-sans.woff2') format('woff2');
-  font-weight: 400 700;
+  font-family: 'Inter';
+  src: url('../assets/fonts/inter.woff2') format('woff2');
+  font-weight: 100 900;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'JetBrains Mono';
+  src: url('../assets/fonts/jetbrains-mono.woff2') format('woff2');
+  font-weight: 100 800;
   font-display: swap;
 }
 
 :root {
   color-scheme: light;
 
-  --font-text: 'Public Sans', system-ui, 'Segoe UI', sans-serif;
-  --font-figures: 'Bodoni Moda', 'Didot', 'Times New Roman', serif;
+  /* Títulos em serifa, textos em Inter e todo valor em R$ em JetBrains Mono, com algarismos da mesma largura. */
+  --font-text: 'Inter', system-ui, 'Segoe UI', sans-serif;
+  --font-display: 'Fraunces', Georgia, 'Times New Roman', serif;
+  --font-figures: 'JetBrains Mono', ui-monospace, 'Cascadia Mono', Consolas, monospace;
 
-  --paper: #edf1ee;
-  --surface: #fbfcfa;
-  --surface-sunken: #e2e8e4;
-  --ink: #12303a;
-  --ink-2: #41565f;
-  --ink-3: #566b73;
-  --line: #d3dcd8;
-  --line-strong: #a9b8b4;
+  --radius-card: 18px;
+  --radius-control: 10px;
+  --blur: 14px;
 
-  --accent: #0b5f70;
-  --accent-ink: #ffffff;
-  --accent-wash: #d7e7e8;
-  --focus: #0b5f70;
+  /* ---------- A paleta ---------- */
+  --black: #000000;
+  --white: #ffffff;
+  --forest-950: #0f1f17;
+  --forest-900: #1e3a2e;
+  --moss-700: #3e5a3f;
+  --olive-800: #3d4337;
+  --sage-600: #5b6457;
+  --sage-500: #6b7f67;
+  --lichen-200: #c7cbb8;
+  --lichen-100: #e4e6dc;
+  --mist-100: #ebede4;
+  --mist-50: #f4f5ef;
+  --mint-300: #6fbf8e;
+  --mint-200: #8fd3a8;
+  --green-700: #1b6f45;
+  --amber-100: #f7ebd0;
+  --amber-400: #e4b65c;
+  --amber-500: #d9a441;
+  --amber-600: #c9932f;
+  --amber-800: #83601d;
+  --rust-700: #a9481b;
+  --rust-300: #e8935a;
+  --wine-700: #a8283f;
+  --wine-300: #f08a9a;
 
-  --income-text: #0c6b3f;
-  --danger: #b02a2a;
-  --danger-wash: #f6dfdc;
+  /* ---------- Papéis (tema claro, o padrão) ---------- */
+  --paper: var(--mist-50);
+  --surface-solid: var(--white);
+  --surface: var(--surface-solid);
+  --surface-sunken: var(--mist-100);
+  --field: var(--white);
+  --control: var(--white);
+  --control-hover: var(--mist-50);
+  --hover: rgba(15, 31, 23, 0.04);
 
-  --status-good: #0c7a2c;
-  --status-good-wash: #dceedd;
-  --status-warning: #8a5a00;
-  --status-warning-wash: #f7e9c7;
-  --status-critical: #b02a2a;
-  --status-critical-wash: #f6dfdc;
-  --meter-good: #1c8f3c;
-  --meter-warning: #e5a50f;
-  --meter-critical: #d03b3b;
-  --meter-goal: #0b5f70;
-  --meter-track: #dde5e1;
+  --glass: rgba(255, 255, 255, 0.8);
+  --glass-strong: rgba(255, 255, 255, 0.92);
+  --glass-highlight: rgba(255, 255, 255, 0.9);
+  --glow: rgba(111, 191, 142, 0.55);
+  --glow-soft: rgba(111, 191, 142, 0.18);
+  --accent-edge: rgba(15, 31, 23, 0.25);
+  --danger-line: rgba(168, 40, 63, 0.3);
+  --ambient: rgba(111, 191, 142, 0.26);
+  --ambient-2: rgba(217, 164, 65, 0.14);
+  --grid: rgba(15, 31, 23, 0.11);
+  --skeleton: rgba(15, 31, 23, 0.07);
+  --skeleton-shine: rgba(255, 255, 255, 0.75);
+  --ripple: rgba(15, 31, 23, 0.14);
+  --card-shadow: 0 1px 2px rgba(15, 31, 23, 0.04), 0 10px 28px -18px rgba(15, 31, 23, 0.3);
 
-  --series-1: #2a78d6;
-  --series-2: #eb6834;
-  --series-3: #1baf7a;
-  --series-4: #eda100;
-  --series-5: #e87ba4;
-  --series-6: #008300;
-  --series-7: #6250d6;
-  --series-8: #e34948;
-  --series-other: #8b9a97;
-  --rule-left: #d9e2dd;
-  --rule-left-ink: #33474f;
+  --ink: var(--forest-950);
+  --ink-2: var(--olive-800);
+  --ink-3: var(--sage-600);
+  --line: var(--lichen-200);
+  --line-strong: var(--sage-500);
 
-  --axis-grid: #e4e9e6;
-  --axis-base: #b4c1bd;
-  --axis-text: #566b73;
+  /* Botão principal em floresta; o "novo lançamento" em âmbar, como chamada de ação. */
+  --accent: var(--forest-900);
+  --accent-ink: var(--mist-50);
+  --accent-text: var(--moss-700);
+  --accent-wash: #e3ece4;
+  --focus: var(--amber-800);
+  --cta: var(--amber-500);
+  --cta-hover: var(--amber-600);
+  --cta-ink: var(--forest-950);
+  --cta-edge: var(--amber-800);
 
-  /* A cédula tem a própria tinta: não muda com o tema, como uma nota de verdade. */
-  --note-paper: #0d4755;
-  --note-paper-2: #0a3a46;
-  --note-line: rgba(196, 232, 226, 0.26);
-  --note-rosette: rgba(232, 185, 60, 0.62);
-  --note-ink: #f4f7f5;
-  --note-ink-2: #c6dcd9;
-  --note-gold: #e8b93c;
+  --income-text: var(--green-700);
+  --expense-text: var(--rust-700);
+  --danger: var(--wine-700);
+  --danger-fill: var(--wine-700);
+  --danger-ink: var(--white);
+  --danger-wash: #f6e3e6;
 
-  --shadow-note: 0 1px 0 rgba(255, 255, 255, 0.12) inset, 0 14px 30px -18px rgba(9, 45, 54, 0.75);
-  --shadow-float: 0 12px 34px -12px rgba(9, 37, 45, 0.42);
+  --status-good: var(--green-700);
+  --status-good-wash: #e1efe6;
+  --status-warning: var(--amber-800);
+  --status-warning-wash: var(--amber-100);
+  --status-critical: var(--wine-700);
+  --status-critical-wash: #f6e3e6;
+  --meter-good: var(--green-700);
+  --meter-warning: #9c7019;
+  --meter-critical: var(--rust-700);
+  --meter-goal: var(--forest-900);
+  --meter-track: var(--lichen-100);
+
+  --toast-surface: var(--forest-950);
+  --toast-ink: var(--mist-50);
+
+  /*
+   * Categorias nos gráficos, com o rótulo em branco por cima. A claridade varia de propósito:
+   * é o que mantém as oito cores separadas para quem tem daltonismo.
+   */
+  --series-1: #3e4500;
+  --series-2: #5d3629;
+  --series-3: #068281;
+  --series-4: #916d33;
+  --series-5: #8062a0;
+  --series-6: #667b58;
+  --series-7: #0e426f;
+  --series-8: #7e2f51;
+  --series-other: #6f7264;
+  --series-ink: var(--white);
+  --flow-in: var(--green-700);
+  --flow-out: var(--rust-700);
+  --rule-left: var(--lichen-100);
+  --rule-left-ink: var(--forest-950);
+
+  --axis-grid: rgba(15, 31, 23, 0.08);
+  --axis-base: var(--sage-500);
+  --axis-text: var(--sage-600);
+
+  /* A cédula é um bloco floresta, com o desenho em menta e âmbar; fica ferrugem quando o mês fecha faltando. */
+  --note-paper: var(--forest-900);
+  --note-paper-2: var(--forest-950);
+  --note-line: rgba(111, 191, 142, 0.16);
+  --note-rosette: rgba(111, 191, 142, 0.55);
+  --note-ink: var(--mist-50);
+  --note-ink-2: var(--lichen-200);
+  --note-gold: var(--amber-400);
+  --note-value-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+  --note-short-paper: #7a3416;
+  --note-short-paper-2: #3f1a0c;
+  --note-short-line: rgba(244, 245, 239, 0.16);
+  --note-short-rosette: rgba(244, 245, 239, 0.5);
+  --note-short-ink: var(--mist-50);
+  --note-short-ink-2: #f1d2c2;
+  --note-short-gold: var(--amber-400);
+  --note-short-value-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+
+  --shadow-note: 0 1px 0 rgba(255, 255, 255, 0.06) inset, 0 24px 48px -24px rgba(15, 31, 23, 0.55);
+  --shadow-float: 0 18px 40px -16px rgba(15, 31, 23, 0.35);
+  --shadow-control: 0 1px 2px rgba(15, 31, 23, 0.18);
+  --backdrop: rgba(15, 31, 23, 0.45);
 }
 
+/* Tema escuro, opcional: a mesma família em floresta profunda. */
 :root[data-theme='dark'] {
   color-scheme: dark;
-  --paper: #0d2229;
-  --surface: #14303a;
-  --surface-sunken: #0a1b21;
-  --ink: #e8f0ee;
-  --ink-2: #b9cbc8;
-  --ink-3: #9cb1ae;
-  --line: #24444f;
-  --line-strong: #3f6370;
-  --accent: #6cc4d3;
-  --accent-ink: #082229;
-  --accent-wash: #1c4450;
-  --focus: #8ad8e6;
-  --income-text: #6fd8a0;
-  --danger: #f08a80;
-  --danger-wash: #48201f;
-  --status-good: #7be096;
-  --status-good-wash: #173f2a;
-  --status-warning: #f4c85c;
-  --status-warning-wash: #443413;
-  --status-critical: #f49b92;
-  --status-critical-wash: #4b2221;
-  --meter-good: #2fb457;
-  --meter-warning: #fab219;
-  --meter-critical: #e25a58;
-  --meter-goal: #6cc4d3;
-  --meter-track: #24444f;
-  --series-1: #3987e5;
-  --series-2: #d95926;
-  --series-3: #199e70;
-  --series-4: #c98500;
-  --series-5: #d55181;
-  --series-6: #008300;
-  --series-7: #9085e9;
-  --series-8: #e66767;
-  --series-other: #7d908e;
-  --rule-left: #24444f;
-  --rule-left-ink: #dbe7e4;
-  --axis-grid: #213f49;
-  --axis-base: #41626e;
-  --axis-text: #9cb1ae;
-  --shadow-note: 0 1px 0 rgba(255, 255, 255, 0.1) inset, 0 14px 30px -18px rgba(0, 0, 0, 0.9);
-  --shadow-float: 0 12px 34px -12px rgba(0, 0, 0, 0.8);
-}
 
-@media (prefers-color-scheme: dark) {
-  :root:where(:not([data-theme='light'])) {
-    color-scheme: dark;
-    --paper: #0d2229;
-    --surface: #14303a;
-    --surface-sunken: #0a1b21;
-    --ink: #e8f0ee;
-    --ink-2: #b9cbc8;
-    --ink-3: #9cb1ae;
-    --line: #24444f;
-    --line-strong: #3f6370;
-    --accent: #6cc4d3;
-    --accent-ink: #082229;
-    --accent-wash: #1c4450;
-    --focus: #8ad8e6;
-    --income-text: #6fd8a0;
-    --danger: #f08a80;
-    --danger-wash: #48201f;
-    --status-good: #7be096;
-    --status-good-wash: #173f2a;
-    --status-warning: #f4c85c;
-    --status-warning-wash: #443413;
-    --status-critical: #f49b92;
-    --status-critical-wash: #4b2221;
-    --meter-good: #2fb457;
-    --meter-warning: #fab219;
-    --meter-critical: #e25a58;
-    --meter-goal: #6cc4d3;
-    --meter-track: #24444f;
-    --series-1: #3987e5;
-    --series-2: #d95926;
-    --series-3: #199e70;
-    --series-4: #c98500;
-    --series-5: #d55181;
-    --series-6: #008300;
-    --series-7: #9085e9;
-    --series-8: #e66767;
-    --series-other: #7d908e;
-    --rule-left: #24444f;
-    --rule-left-ink: #dbe7e4;
-    --axis-grid: #213f49;
-    --axis-base: #41626e;
-    --axis-text: #9cb1ae;
-    --shadow-note: 0 1px 0 rgba(255, 255, 255, 0.1) inset, 0 14px 30px -18px rgba(0, 0, 0, 0.9);
-    --shadow-float: 0 12px 34px -12px rgba(0, 0, 0, 0.8);
-  }
+  --paper: #0b0f0d;
+  --surface-solid: #14201a;
+  --surface-sunken: #0f1813;
+  --field: #0f1813;
+  --control: #1b2a22;
+  --control-hover: #23362c;
+  --hover: rgba(244, 245, 239, 0.05);
+
+  --glass: rgba(20, 32, 26, 0.78);
+  --glass-strong: rgba(15, 24, 19, 0.92);
+  --glass-highlight: rgba(244, 245, 239, 0.05);
+  --glow: rgba(111, 191, 142, 0.5);
+  --glow-soft: rgba(111, 191, 142, 0.16);
+  --accent-edge: rgba(143, 211, 168, 0.35);
+  --danger-line: rgba(240, 138, 154, 0.3);
+  --ambient: rgba(111, 191, 142, 0.16);
+  --ambient-2: rgba(217, 164, 65, 0.08);
+  --grid: rgba(199, 203, 184, 0.09);
+  --skeleton: rgba(199, 203, 184, 0.1);
+  --skeleton-shine: rgba(244, 245, 239, 0.08);
+  --ripple: rgba(244, 245, 239, 0.2);
+  --card-shadow: 0 1px 0 rgba(244, 245, 239, 0.03) inset, 0 12px 30px -18px rgba(0, 0, 0, 0.8);
+
+  --ink: var(--mist-50);
+  --ink-2: var(--lichen-200);
+  --ink-3: #9aa58f;
+  --line: rgba(199, 203, 184, 0.14);
+  --line-strong: var(--sage-500);
+
+  --accent: var(--mint-300);
+  --accent-ink: var(--forest-950);
+  --accent-text: var(--mint-200);
+  --accent-wash: var(--forest-900);
+  --focus: var(--amber-400);
+  --cta: var(--amber-400);
+  --cta-hover: var(--amber-500);
+  --cta-ink: var(--forest-950);
+  --cta-edge: var(--amber-600);
+
+  --income-text: var(--mint-300);
+  --expense-text: var(--rust-300);
+  --danger: var(--wine-300);
+  --danger-fill: var(--wine-300);
+  --danger-ink: var(--forest-950);
+  --danger-wash: #3a1a20;
+
+  --status-good: var(--mint-200);
+  --status-good-wash: var(--forest-900);
+  --status-warning: var(--amber-400);
+  --status-warning-wash: #3a2f15;
+  --status-critical: var(--wine-300);
+  --status-critical-wash: #3a1a20;
+  --meter-good: var(--mint-300);
+  --meter-warning: var(--amber-400);
+  --meter-critical: var(--rust-300);
+  --meter-goal: var(--mist-50);
+  --meter-track: #1b2a22;
+
+  --toast-surface: var(--mist-50);
+  --toast-ink: var(--forest-950);
+
+  --series-1: #81884c;
+  --series-2: #c19886;
+  --series-3: #46bdc0;
+  --series-4: #edd597;
+  --series-5: #d8c2ff;
+  --series-6: #b3e3be;
+  --series-7: #5089b5;
+  --series-8: #b86d8a;
+  --series-other: #9aa58f;
+  --series-ink: var(--black);
+  --flow-in: var(--mint-300);
+  --flow-out: var(--rust-300);
+  --rule-left: var(--forest-900);
+  --rule-left-ink: var(--mist-50);
+
+  --axis-grid: rgba(199, 203, 184, 0.1);
+  --axis-base: var(--sage-500);
+  --axis-text: #9aa58f;
+
+  --shadow-note: 0 0 0 1px rgba(199, 203, 184, 0.1), 0 24px 48px -24px rgba(0, 0, 0, 0.9);
+  --shadow-float: 0 18px 40px -16px rgba(0, 0, 0, 0.8);
+  --shadow-control: 0 1px 2px rgba(0, 0, 0, 0.6);
+  --backdrop: rgba(0, 0, 0, 0.6);
 }

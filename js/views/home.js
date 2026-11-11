@@ -4,28 +4,21 @@
   const { el } = FM.dom;
   const { money, dates, queries: q, charts, common } = FM;
 
-  function stat(label, value, note) {
-    return el(
-      'div',
-      { class: 'stat' },
-      el('dt', {}, label),
-      el('dd', {}, el('strong', {}, value), note && el('small', {}, note)),
-    );
-  }
+  const { stat } = common;
 
   function stats(ctx, summary) {
     const { state } = ctx.store;
     const today = ctx.store.today();
     const allowance = q.perDayAllowance(state, ctx.month, today);
     const list = [
-      stat('Saldo hoje', money.format(q.totalBalance(state)), 'Em todas as carteiras'),
-      stat('Entradas do mês', money.format(summary.income), summary.toReceive ? `${money.format(summary.toReceive)} a receber` : null),
-      stat('Saídas do mês', money.format(summary.expense), summary.toPay ? `${money.format(summary.toPay)} a pagar` : null),
+      stat('Saldo hoje', q.totalBalance(state), 'Em todas as carteiras'),
+      stat('Entradas do mês', summary.income, summary.toReceive ? `${money.format(summary.toReceive)} a receber` : null),
+      stat('Saídas do mês', summary.expense, summary.toPay ? `${money.format(summary.toPay)} a pagar` : null),
     ];
     if (allowance) {
       list.push(stat(
         'Dá para gastar por dia',
-        money.format(allowance.perDay),
+        allowance.perDay,
         allowance.left > 0
           ? `Nos próximos ${allowance.days} ${allowance.days === 1 ? 'dia' : 'dias'}, sem ficar no vermelho`
           : 'O mês já está sem folga',
@@ -41,7 +34,7 @@
     if (!rule) return null;
     return el(
       'section',
-      { class: 'band' },
+      { class: 'band card' },
       el(
         'div',
         { class: 'band-head' },
@@ -59,7 +52,7 @@
     const list = q.pending(state, today, { limit: 6, month: isCurrent ? null : ctx.month });
     return el(
       'section',
-      { class: 'column' },
+      { class: 'column card' },
       el(
         'div',
         { class: 'column-head' },
@@ -68,7 +61,7 @@
       ),
       list.length
         ? el('ul', { class: 'tx-list' }, list.map((p) => common.txLine(ctx, p.tx)))
-        : common.emptyState('Nada pendente', 'Lançamentos com data futura ou marcados como não pagos aparecem aqui.'),
+        : common.emptyState('Nada pendente', 'Lançamentos com data futura ou marcados como não pagos aparecem aqui.', null, 'check'),
     );
   }
 
@@ -76,7 +69,7 @@
     const list = q.budgets(ctx.store.state, ctx.month).slice(0, 4);
     return el(
       'section',
-      { class: 'column' },
+      { class: 'column card' },
       el(
         'div',
         { class: 'column-head' },
@@ -102,7 +95,7 @@
               ),
             ),
           )
-        : common.emptyState('Nenhum limite definido', 'Defina quanto quer gastar por categoria e acompanhe aqui.'),
+        : common.emptyState('Nenhum limite definido', 'Defina quanto quer gastar por categoria e acompanhe aqui.', null, 'pie'),
     );
   }
 
@@ -113,7 +106,7 @@
     if (!list.length) return null;
     return el(
       'section',
-      { class: 'column' },
+      { class: 'column card' },
       el(
         'div',
         { class: 'column-head' },
@@ -129,7 +122,7 @@
     if (!list.length) return null;
     return el(
       'section',
-      { class: 'column' },
+      { class: 'column card' },
       el('div', { class: 'column-head' }, el('h2', {}, 'O que chama atenção')),
       el('ul', { class: 'insights' }, list.map((item) => el('li', { class: `insight insight-${item.tone}` }, item.text))),
     );
@@ -155,6 +148,7 @@
         `Nenhum lançamento em ${dates.monthName(ctx.month)}`,
         'Registre o que entrou e o que saiu para ver quanto sobra.',
         common.newButton(ctx, {}, 'Registrar o primeiro'),
+        'list',
       ),
       ruleSection(ctx, summary),
       el(

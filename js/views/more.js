@@ -98,8 +98,8 @@
           el('button', { class: 'button button-primary', type: 'button', dataset: { fk: 'nova-carteira' }, onclick: () => openAccountForm(ctx) }, icon('plus'), 'Nova carteira'),
         ],
       }),
-      el('p', { class: 'total-line' }, 'Somando tudo, você tem ', el('strong', {}, money.format(q.totalBalance(state))), ' hoje.'),
-      el('ul', { class: 'account-list' }, rows),
+      el('p', { class: 'total-line' }, 'Somando tudo, você tem ', el('strong', { dataset: { count: q.totalBalance(state) } }, money.format(q.totalBalance(state))), ' hoje.'),
+      el('ul', { class: 'account-list card' }, rows),
       el(
         'div',
         { class: 'chart-filter' },
@@ -167,19 +167,19 @@
         }),
       }),
       !hasData
-        ? common.emptyState('Ainda não há o que comparar', 'Os relatórios aparecem assim que houver lançamentos no período.', common.newButton(ctx))
+        ? common.emptyState('Ainda não há o que comparar', 'Os relatórios aparecem assim que houver lançamentos no período.', common.newButton(ctx), 'chart')
         : [
             el(
               'dl',
               { class: 'stats stats-row' },
-              el('div', { class: 'stat' }, el('dt', {}, 'Entrou'), el('dd', {}, el('strong', {}, money.format(income)))),
-              el('div', { class: 'stat' }, el('dt', {}, 'Saiu'), el('dd', {}, el('strong', {}, money.format(expense)))),
-              el('div', { class: 'stat' }, el('dt', {}, left < 0 ? 'Faltou' : 'Sobrou'), el('dd', {}, el('strong', {}, money.format(Math.abs(left))), rate != null && el('small', {}, `${rate}% do que entrou`))),
-              el('div', { class: 'stat' }, el('dt', {}, 'Média de gasto por mês'), el('dd', {}, el('strong', {}, money.format(Math.round(expense / reportRange))))),
+              common.stat('Entrou', income),
+              common.stat('Saiu', expense),
+              common.stat(left < 0 ? 'Faltou' : 'Sobrou', Math.abs(left), rate != null ? `${rate}% do que entrou` : null),
+              common.stat('Média de gasto por mês', Math.round(expense / reportRange)),
             ),
             insights.length > 0 && el(
               'section',
-              { class: 'band' },
+              { class: 'band card' },
               el('div', { class: 'band-head' }, el('h2', {}, `Sobre ${dates.monthName(month)}`)),
               el('ul', { class: 'insights' }, insights.map((item) => el('li', { class: `insight insight-${item.tone}` }, item.text))),
             ),
@@ -384,30 +384,29 @@
       common.pageHead('Ajustes'),
       el(
         'section',
-        { class: 'band' },
+        { class: 'band card' },
         el('div', { class: 'band-head' }, el('h2', {}, 'Aparência')),
         segmented('tema', 'Tema', [
-          { value: 'auto', label: 'Igual ao sistema' },
           { value: 'light', label: 'Claro' },
           { value: 'dark', label: 'Escuro' },
-        ], state.theme, (value) => store.setTheme(value)),
+        ], state.theme === 'dark' ? 'dark' : 'light', (value) => store.setTheme(value)),
       ),
       el(
         'section',
-        { class: 'band' },
+        { class: 'band card' },
         el('div', { class: 'band-head' }, el('h2', {}, 'Categorias')),
         categoryList(ctx, 'expense', 'Despesas'),
         categoryList(ctx, 'income', 'Receitas'),
-        el('p', { class: 'field-hint' }, 'Os gráficos têm 8 cores, uma por categoria de despesa. Categorias além disso aparecem em cinza.'),
+        el('p', { class: 'field-hint' }, 'Os gráficos têm 8 cores, uma por categoria de despesa. Categorias além disso aparecem em cinza-sálvia.'),
       ),
       el(
         'section',
-        { class: 'band' },
+        { class: 'band card' },
         el(
           'div',
           { class: 'band-head' },
           el('h2', {}, 'Seus dados'),
-          el('p', { class: 'chart-sub' }, 'Tudo fica só neste navegador, neste aparelho. Nada é enviado para a internet. Limpar os dados do navegador apaga o Sobra, então baixe um backup de vez em quando.'),
+          el('p', { class: 'chart-sub' }, 'Seus lançamentos, saldos e metas ficam só neste navegador, neste aparelho, e nunca são enviados para a internet. Limpar os dados do navegador apaga o Sobra Finance, então baixe um backup de vez em quando.'),
         ),
         el(
           'div',
@@ -424,20 +423,38 @@
         ),
         el('p', { class: 'field-hint' }, 'O CSV precisa de colunas de data, descrição e valor. Valor negativo vira despesa e positivo vira receita. Linhas iguais às que já existem ficam de fora.'),
       ),
+      FM.telemetry.enabled() && el(
+        'section',
+        { class: 'band card' },
+        el(
+          'div',
+          { class: 'band-head' },
+          el('h2', {}, 'Privacidade'),
+          el('p', { class: 'chart-sub' }, 'Para saber quantos aparelhos usam o app, o Sobra Finance pode enviar, uma vez por dia, dados técnicos anônimos: sistema, navegador, modelo, tamanho da tela, versão do app e se ele está instalado. Nenhum lançamento, saldo ou dado pessoal é enviado.'),
+        ),
+        segmented('contagem', 'Contagem anônima de aparelhos', [
+          { value: 'aceito', label: 'Participar' },
+          { value: 'recusado', label: 'Não participar' },
+        ], FM.telemetry.consent() || '', (value) => {
+          FM.telemetry.setConsent(value === 'aceito');
+          toast(value === 'aceito' ? 'Este aparelho entra na contagem' : 'Este aparelho não envia mais nada');
+        }),
+        FM.telemetry.consent() === 'aceito' && FM.telemetry.deviceId() && el('p', { class: 'field-hint' }, `Identificador aleatório deste aparelho: ${FM.telemetry.deviceId().slice(0, 8)}. Ele não diz quem você é.`),
+      ),
       FM.pwa.canOffer() && el(
         'section',
-        { class: 'band' },
+        { class: 'band card' },
         el(
           'div',
           { class: 'band-head' },
           el('h2', {}, 'Instalar como aplicativo'),
-          el('p', { class: 'chart-sub' }, 'O Sobra ganha um ícone na tela inicial, abre em tela cheia e funciona sem internet. Os dados do aplicativo podem ficar separados dos deste navegador: se já tiver lançamentos aqui, baixe um backup e restaure depois de instalar.'),
+          el('p', { class: 'chart-sub' }, 'O Sobra Finance ganha um ícone na tela inicial, abre em tela cheia e funciona sem internet. Os dados do aplicativo podem ficar separados dos deste navegador: se já tiver lançamentos aqui, baixe um backup e restaure depois de instalar.'),
         ),
-        el('div', { class: 'action-list' }, el('button', { class: 'button', type: 'button', onclick: () => FM.pwa.install() }, icon('download'), 'Instalar o Sobra')),
+        el('div', { class: 'action-list' }, el('button', { class: 'button', type: 'button', onclick: () => FM.pwa.install() }, icon('download'), 'Instalar o Sobra Finance')),
       ),
       el(
         'section',
-        { class: 'band band-shortcuts' },
+        { class: 'band card band-shortcuts' },
         el('div', { class: 'band-head' }, el('h2', {}, 'Atalhos de teclado')),
         el(
           'dl',
@@ -449,7 +466,7 @@
       ),
       el(
         'section',
-        { class: 'band band-danger' },
+        { class: 'band card band-danger' },
         el('div', { class: 'band-head' }, el('h2', {}, 'Recomeçar')),
         el(
           'div',
@@ -472,7 +489,19 @@
           el('button', { class: 'button button-ghost-danger', type: 'button', onclick: eraseAll }, icon('trash'), 'Apagar todos os dados'),
         ),
       ),
+      el('p', { class: 'field-hint app-version' }, versionText()),
     );
+  }
+
+  /** "Versão 1.2.0, publicada em 11/11/2026 15:30": dá para conferir em qualquer aparelho se a atualização chegou. */
+  function versionText() {
+    const { appVersion, build } = FM.config;
+    const stamp = /^(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})-/.exec(build || '');
+    if (!stamp) return `Versão ${appVersion} (cópia local)`;
+    const [, year, month, day, hour, minute] = stamp;
+    const when = new Date(Date.UTC(+year, +month - 1, +day, +hour, +minute));
+    const label = when.toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+    return `Versão ${appVersion}, publicada em ${label}`;
   }
 
   FM.views = FM.views || {};

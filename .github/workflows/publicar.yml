@@ -1,0 +1,61 @@
+# Publica o Sobra no GitHub Pages a cada envio para a main.
+#
+# 1. Roda os testes: se algum falhar, nada é publicado e os aparelhos continuam na versão anterior.
+# 2. Carimba a publicação (data e commit) no lugar de __BUILD__, em sw.js e js/config.js.
+#    Como o sw.js muda a cada publicação, todo aparelho percebe a versão nova e se atualiza sozinho
+#    (ver js/ui/pwa.js). Não é preciso mudar número de versão à mão.
+# 3. Publica só os arquivos do app: testes, migrations e documentação ficam de fora.
+name: Publicar
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  testes:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+      - run: npm test
+
+  publicar:
+    needs: testes
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Carimbar a publicação
+        run: |
+          BUILD="$(date -u +%Y%m%d%H%M)-${GITHUB_SHA::7}"
+          sed -i "s/__BUILD__/${BUILD}/g" sw.js js/config.js
+          if grep -q "__BUILD__" sw.js js/config.js; then echo "O carimbo não foi aplicado"; exit 1; fi
+          echo "Publicação ${BUILD}"
+
+      - name: Separar os arquivos do app
+        run: |
+          mkdir _site
+          cp -r index.html manifest.webmanifest sw.js css js assets _site/
+          touch _site/.nojekyll
+
+      - uses: actions/configure-pages@v6
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: _site
+      - id: deploy
+        uses: actions/deploy-pages@v5

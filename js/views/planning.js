@@ -111,11 +111,11 @@
       el(
         'dl',
         { class: 'stats stats-row' },
-        el('div', { class: 'stat' }, el('dt', {}, 'Planejado'), el('dd', {}, el('strong', {}, money.format(planned)))),
-        el('div', { class: 'stat' }, el('dt', {}, 'Gasto no mês'), el('dd', {}, el('strong', {}, money.format(summary.expense)))),
-        el('div', { class: 'stat' }, el('dt', {}, 'Entrou no mês'), el('dd', {}, el('strong', {}, money.format(summary.income)))),
+        common.stat('Planejado', planned),
+        common.stat('Gasto no mês', summary.expense),
+        common.stat('Entrou no mês', summary.income),
       ),
-      el('ul', { class: 'budget-list' }, categories.map(row)),
+      el('ul', { class: 'budget-list card' }, categories.map(row)),
     );
   }
 
@@ -286,21 +286,21 @@
           dataset: { fk: 'nova-fixa' },
           onclick: () => openRecurringForm(ctx),
         }, icon('plus'), 'Nova conta fixa'),
-        intro: 'Todo mês o Sobra cria o lançamento como pendente. Você só confirma quando pagar ou receber.',
+        intro: 'Todo mês o Sobra Finance cria o lançamento como pendente. Você só confirma quando pagar ou receber.',
       }),
       state.recurring.length > 0 && el(
         'dl',
         { class: 'stats stats-row' },
-        el('div', { class: 'stat' }, el('dt', {}, 'Sai todo mês'), el('dd', {}, el('strong', {}, money.format(monthlyOut)))),
-        el('div', { class: 'stat' }, el('dt', {}, 'Entra todo mês'), el('dd', {}, el('strong', {}, money.format(monthlyIn)))),
-        el('div', { class: 'stat' }, el('dt', {}, 'Livre depois das fixas'), el('dd', {}, el('strong', {}, money.format(monthlyIn - monthlyOut)))),
+        common.stat('Sai todo mês', monthlyOut),
+        common.stat('Entra todo mês', monthlyIn),
+        common.stat('Livre depois das fixas', monthlyIn - monthlyOut),
       ),
       rows.length
-        ? el('ul', { class: 'rule-list' }, rows)
-        : common.emptyState('Nenhuma conta fixa', 'Cadastre aluguel, internet, salário e o que mais se repete todo mês.'),
+        ? el('ul', { class: 'rule-list card' }, rows)
+        : common.emptyState('Nenhuma conta fixa', 'Cadastre aluguel, internet, salário e o que mais se repete todo mês.', el('button', { class: 'button button-primary', type: 'button', onclick: () => openRecurringForm(ctx) }, icon('plus'), 'Cadastrar a primeira'), 'repeat'),
       el(
         'section',
-        { class: 'band' },
+        { class: 'band card' },
         el('div', { class: 'band-head' }, el('h2', {}, 'Parcelas em andamento')),
         running.length
           ? el(
@@ -325,7 +325,7 @@
                 ),
               ),
             )
-          : common.emptyState('Nenhuma parcela em andamento', 'Ao lançar uma compra, escolha "Parcelado" em Repetir.'),
+          : common.emptyState('Nenhuma parcela em andamento', 'Ao lançar uma compra, escolha "Parcelado" em Repetir.', null, 'clock'),
       ),
     );
   }
@@ -340,7 +340,7 @@
 
     const nameField = field('Nome da meta', nameInput);
     const targetField = field('Quanto quer juntar', targetInput, { class: 'field-money' });
-    const deadlineField = field('Até quando', deadlineInput, { hint: 'Opcional. Com prazo, o Sobra calcula quanto guardar por mês.' });
+    const deadlineField = field('Até quando', deadlineInput, { hint: 'Opcional. Com prazo, o Sobra Finance calcula quanto guardar por mês.' });
 
     const submit = () => {
       let ok = true;
@@ -421,7 +421,7 @@
 
       return el(
         'li',
-        { class: `goal${done ? ' is-done' : ''}` },
+        { class: `goal card${done ? ' is-done' : ''}` },
         el(
           'div',
           { class: 'goal-head' },
@@ -457,7 +457,7 @@
       }),
       state.goals.length
         ? el('ul', { class: 'goal-list' }, state.goals.map(row))
-        : common.emptyState('Nenhuma meta ainda', 'Crie uma meta e acompanhe quanto falta para chegar lá.'),
+        : common.emptyState('Nenhuma meta ainda', 'Crie uma meta e acompanhe quanto falta para chegar lá.', el('button', { class: 'button button-primary', type: 'button', onclick: () => openGoalForm(ctx) }, icon('plus'), 'Criar a primeira meta'), 'target'),
     );
   }
 

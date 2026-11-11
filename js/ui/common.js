@@ -125,8 +125,26 @@
     );
   }
 
-  function emptyState(title, text, action = null) {
-    return el('div', { class: 'empty' }, el('p', { class: 'empty-title' }, title), text && el('p', {}, text), action);
+  /** Tela ou lista sem nada: um ícone, o que falta e, quando dá, o botão que resolve. */
+  function emptyState(title, text, action = null, iconName = 'inbox') {
+    return el(
+      'div',
+      { class: 'empty' },
+      el('span', { class: 'empty-art', 'aria-hidden': 'true' }, icon(iconName, 26)),
+      el('p', { class: 'empty-title' }, title),
+      text && el('p', { class: 'empty-text' }, text),
+      action,
+    );
+  }
+
+  /** Número solto em um cartão. O valor vem em centavos e conta de zero quando a tela abre. */
+  function stat(label, cents, note = null) {
+    return el(
+      'div',
+      { class: 'stat card' },
+      el('dt', {}, label),
+      el('dd', {}, el('strong', { dataset: { count: cents } }, money.format(cents)), note && el('small', {}, note)),
+    );
   }
 
   /** Lê um campo de dinheiro e mostra o erro nele. Devolve os centavos ou null. */
@@ -187,6 +205,7 @@
     paidButton,
     txLine,
     emptyState,
+    stat,
     readMoney,
     meter,
     levelBadge,

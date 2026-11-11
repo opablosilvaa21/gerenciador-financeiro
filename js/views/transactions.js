@@ -60,7 +60,7 @@
     visible = PAGE;
     for (const id of [...selected]) if (!state.transactions.some((t) => t.id === id)) selected.delete(id);
 
-    const listRegion = el('div', { class: 'tx-region' });
+    const listRegion = el('div', { class: 'tx-region card' });
     const summaryLine = el('p', { class: 'filter-summary', 'aria-live': 'polite' });
     const bulkBar = el('div', { class: 'bulk', hidden: true });
 
@@ -315,8 +315,8 @@
                   Object.assign(filters, { q: '', type: '', categoryId: '', accountId: '', status: '' });
                   ctx.refresh();
                 },
-              }, 'Limpar filtros'))
-            : common.emptyState(`Nenhum lançamento ${scope}`, 'Registre o primeiro para começar.', common.newButton(ctx)),
+              }, 'Limpar filtros'), 'search')
+            : common.emptyState(`Nenhum lançamento ${scope}`, 'Registre o primeiro para começar.', common.newButton(ctx), 'list'),
         );
         return;
       }

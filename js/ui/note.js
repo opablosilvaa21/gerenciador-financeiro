@@ -109,7 +109,7 @@
         'div',
         { class: 'note-face' },
         el('p', { class: 'note-label' }, label),
-        el('p', { class: 'note-value', id: 'note-value' }, money.format(Math.abs(left))),
+        el('p', { class: 'note-value', id: 'note-value', dataset: { count: Math.abs(left) } }, money.format(Math.abs(left))),
         el('p', { class: 'note-serial' }, `Série ${month.replace('-', '/')}`),
       ),
     );

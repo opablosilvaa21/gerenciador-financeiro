@@ -3,13 +3,13 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
-  <title>Sobra</title>
-  <meta name="description" content="Gerenciador financeiro pessoal. Seus dados ficam só no seu navegador.">
+  <title>Sobra Finance</title>
+  <meta name="description" content="Gerenciador financeiro pessoal. Seus dados financeiros ficam só no seu aparelho.">
   <meta name="color-scheme" content="light dark">
-  <meta name="theme-color" content="#edf1ee">
+  <meta name="theme-color" content="#f4f5ef">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-title" content="Sobra">
+  <meta name="apple-mobile-web-app-title" content="Sobra Finance">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <link rel="icon" href="assets/icone.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="assets/icone-180.png">
@@ -20,33 +20,47 @@
   <a class="skip-link" href="#main">Pular para o conteúdo</a>
   <div class="shell">
     <aside class="side">
-      <a class="brand" href="#/inicio">Sobra</a>
+      <a class="brand" href="#/inicio">Sobra <span class="brand-sub">Finance</span></a>
       <nav id="nav" class="nav" aria-label="Principal"></nav>
     </aside>
     <div class="content">
+      <a class="brand brand-top" href="#/inicio">Sobra <span class="brand-sub">Finance</span></a>
       <div id="banners"></div>
-      <main id="main" tabindex="-1"></main>
+      <main id="main" tabindex="-1">
+        <div class="skeleton" role="status" aria-label="Carregando">
+          <span class="sk sk-title"></span>
+          <span class="sk sk-hero"></span>
+          <div class="sk-row"><span class="sk sk-card"></span><span class="sk sk-card"></span><span class="sk sk-card"></span><span class="sk sk-card"></span></div>
+          <span class="sk sk-block"></span>
+        </div>
+      </main>
     </div>
   </div>
   <nav id="tabbar" class="tabbar" aria-label="Principal"></nav>
   <div id="toasts" class="toasts" role="status" aria-live="polite"></div>
-  <noscript><p class="noscript">O Sobra precisa de JavaScript ligado no navegador para funcionar.</p></noscript>
+  <noscript><p class="noscript">O Sobra Finance precisa de JavaScript ligado no navegador para funcionar.</p></noscript>
 
+  <script src="js/config.js"></script>
   <script src="js/core/money.js"></script>
   <script src="js/core/dates.js"></script>
   <script src="js/core/store.js"></script>
   <script src="js/core/queries.js"></script>
   <script src="js/core/demo.js"></script>
+  <script src="js/core/device.js"></script>
   <script src="js/ui/dom.js"></script>
+  <script src="js/ui/motion.js"></script>
   <script src="js/ui/charts.js"></script>
   <script src="js/ui/note.js"></script>
   <script src="js/ui/common.js"></script>
   <script src="js/ui/tx-form.js"></script>
   <script src="js/ui/pwa.js"></script>
+  <script src="js/ui/backend.js"></script>
+  <script src="js/ui/telemetry.js"></script>
   <script src="js/views/home.js"></script>
   <script src="js/views/transactions.js"></script>
   <script src="js/views/planning.js"></script>
   <script src="js/views/more.js"></script>
+  <script src="js/views/admin.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>

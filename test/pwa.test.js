@@ -19,7 +19,7 @@ test('tudo o que a página carrega está na lista offline', () => {
   const used = [...html.matchAll(/<(?:script src|link rel="stylesheet" href)="([^"]+)"/g)].map((m) => m[1]);
   assert.ok(used.length > 10);
   const fonts = [...read('css/tokens.css').matchAll(/url\('\.\.\/([^']+)'\)/g)].map((m) => m[1]);
-  assert.equal(fonts.length, 2);
+  assert.equal(fonts.length, 3);
   const list = swFiles();
   for (const file of [...used, ...fonts, './', 'index.html', 'manifest.webmanifest']) {
     assert.ok(list.includes(file), `${file} não abre sem internet`);
@@ -34,6 +34,31 @@ test('os ícones e as telas do manifesto existem no tamanho declarado', () => {
     const png = fs.readFileSync(path.join(ROOT, image.src));
     assert.equal(`${png.readUInt32BE(16)}x${png.readUInt32BE(20)}`, image.sizes, image.src);
   }
+});
+
+test('toda publicação muda o sw.js, e é isso que faz os aparelhos se atualizarem', () => {
+  const has = (text, piece, message) => assert.ok(text.includes(piece), message || `falta: ${piece}`);
+  const sw = read('sw.js');
+  has(sw, "const BUILD = '__BUILD__';");
+  has(sw, 'const CACHE = `sobra-${BUILD}`;');
+  has(read('js/config.js'), "build: '__BUILD__'");
+  const workflow = read('.github/workflows/publicar.yml');
+  has(workflow, 'sed -i "s/__BUILD__/${BUILD}/g" sw.js js/config.js');
+  has(workflow, 'run: npm test');
+  has(workflow, 'needs: testes', 'só publica se os testes passarem');
+});
+
+test('a publicação leva tudo o que a página carrega', () => {
+  const line = read('.github/workflows/publicar.yml').split('\n').find((l) => l.trim().startsWith('cp -r '));
+  const copy = line.trim().replace('cp -r ', '').replace(' _site/', '').split(' ');
+  for (const file of swFiles().filter((f) => f !== './')) {
+    assert.ok(copy.some((entry) => file === entry || file.startsWith(`${entry}/`)), `${file} não seria publicado`);
+  }
+});
+
+test('a versão do app é a mesma no package.json e em js/config.js', () => {
+  const { version } = JSON.parse(read('package.json'));
+  assert.ok(read('js/config.js').includes(`appVersion: '${version}'`), `js/config.js não está na versão ${version}`);
 });
 
 test('os endereços do manifesto são relativos, para funcionar dentro da pasta do GitHub Pages', () => {
