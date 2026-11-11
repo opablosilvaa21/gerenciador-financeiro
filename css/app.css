@@ -2958,6 +2958,18 @@ kbd {
   }
 }
 
+/* No papel não há rolagem: os gráficos que esperavam entrar na tela saem prontos. */
+@media print {
+  [data-reveal] :is(.bar, .ranking-bar, .rule-part, .meter-fill),
+  [data-reveal].meter .meter-fill {
+    transform: none !important;
+  }
+
+  [data-reveal] :is(.line-stroke, .line-area, .line-dot, .line-label) {
+    opacity: 1 !important;
+  }
+}
+
 @media (forced-colors: active) {
   .rule-part,
   .meter-fill,
