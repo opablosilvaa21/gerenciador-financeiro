@@ -1,12 +1,18 @@
 /*
- * Paleta "dress code": preto, dois verdes-oliva e um sálvia. Toda cor do app sai daqui.
- * O tema escuro é o padrão; o claro só entra quando a pessoa escolhe em Ajustes.
- * Os pares de texto e fundo são conferidos por test/contrast.js (WCAG AA).
+ * Paleta "Floresta": névoa clara, verde floresta, líquen, menta e âmbar.
+ * O tema claro (névoa) é o padrão; o escuro (floresta) entra quando a pessoa escolhe em Ajustes.
+ * Toda cor do app sai daqui. Os pares de texto e fundo são conferidos por test/contrast.js (WCAG AA).
  */
 @font-face {
-  font-family: 'Space Grotesk';
-  src: url('../assets/fonts/space-grotesk.woff2') format('woff2');
-  font-weight: 300 700;
+  font-family: 'Fraunces';
+  src: url('../assets/fonts/fraunces.woff2') format('woff2');
+  font-weight: 100 900;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Inter';
+  src: url('../assets/fonts/inter.woff2') format('woff2');
+  font-weight: 100 900;
   font-display: swap;
 }
 @font-face {
@@ -17,201 +23,111 @@
 }
 
 :root {
-  color-scheme: dark;
+  color-scheme: light;
 
-  /* Textos em Space Grotesk; todo valor em R$ em JetBrains Mono, com algarismos da mesma largura. */
-  --font-text: 'Space Grotesk', system-ui, 'Segoe UI', sans-serif;
-  --font-display: var(--font-text);
+  /* Títulos em serifa, textos em Inter e todo valor em R$ em JetBrains Mono, com algarismos da mesma largura. */
+  --font-text: 'Inter', system-ui, 'Segoe UI', sans-serif;
+  --font-display: 'Fraunces', Georgia, 'Times New Roman', serif;
   --font-figures: 'JetBrains Mono', ui-monospace, 'Cascadia Mono', Consolas, monospace;
 
-  --radius-card: 16px;
+  --radius-card: 18px;
   --radius-control: 10px;
   --blur: 14px;
 
   /* ---------- A paleta ---------- */
   --black: #000000;
-  --olive-800: #30322a;
-  --olive-500: #5c6150;
-  --sage-300: #9a9c8c;
-  --offwhite: #e8e9e1;
+  --white: #ffffff;
+  --forest-950: #0f1f17;
+  --forest-900: #1e3a2e;
+  --moss-700: #3e5a3f;
+  --olive-800: #3d4337;
+  --sage-600: #5b6457;
+  --sage-500: #6b7f67;
+  --lichen-200: #c7cbb8;
+  --lichen-100: #e4e6dc;
+  --mist-100: #ebede4;
+  --mist-50: #f4f5ef;
+  --mint-300: #6fbf8e;
+  --mint-200: #8fd3a8;
+  --green-700: #1b6f45;
+  --amber-100: #f7ebd0;
+  --amber-400: #e4b65c;
+  --amber-500: #d9a441;
+  --amber-600: #c9932f;
+  --amber-800: #83601d;
+  --rust-700: #a9481b;
+  --rust-300: #e8935a;
+  --wine-700: #a8283f;
+  --wine-300: #f08a9a;
 
-  /* Tons derivados dela: mais escuros e mais claros do mesmo verde. */
-  --olive-900: #1c1d18;
-  --olive-700: #3b3e34;
-  --olive-600: #474b3e;
-  --olive-200: #c5ccab;
-  --sage-400: #80846f;
-  --sage-200: #b9bbad;
-  /* Terracota e ocre discretos, só para despesa, falta e avisos. */
-  --terracotta-300: #d99a7e;
-  --terracotta-700: #6b3a28;
-  --terracotta-800: #4a2e22;
-  --terracotta-900: #3a2219;
-  --ochre-300: #d9bc74;
-  --ochre-800: #3f3620;
-
-  /* ---------- Papéis ---------- */
-  --paper: var(--black);
-  --surface-solid: var(--olive-800);
+  /* ---------- Papéis (tema claro, o padrão) ---------- */
+  --paper: var(--mist-50);
+  --surface-solid: var(--white);
   --surface: var(--surface-solid);
-  --surface-sunken: var(--olive-900);
-  --field: var(--olive-900);
-  --control: var(--olive-700);
-  --control-hover: var(--olive-600);
-  --hover: rgba(232, 233, 225, 0.05);
-  /* Vidro: o verde-oliva escuro deixa passar o fundo desfocado. Nunca fica mais claro que --olive-800,
-     que é o fundo usado na conferência de contraste. */
-  --glass: rgba(48, 50, 42, 0.62);
-  --glass-strong: rgba(40, 42, 35, 0.88);
-  --glass-highlight: rgba(232, 233, 225, 0.05);
-  --glow: rgba(92, 97, 80, 0.7);
-  --glow-soft: rgba(92, 97, 80, 0.32);
-  --accent-edge: rgba(197, 204, 171, 0.3);
-  --danger-line: rgba(217, 154, 126, 0.3);
-  --ambient: rgba(92, 97, 80, 0.36);
-  --ambient-2: rgba(92, 97, 80, 0.2);
-  --grid: rgba(154, 156, 140, 0.055);
-  --skeleton: rgba(154, 156, 140, 0.13);
-  --skeleton-shine: rgba(232, 233, 225, 0.09);
-  --ripple: rgba(232, 233, 225, 0.22);
-  --ink: var(--offwhite);
-  --ink-2: var(--sage-200);
-  --ink-3: var(--sage-300);
-  --line: rgba(154, 156, 140, 0.2);
-  --line-strong: var(--sage-400);
+  --surface-sunken: var(--mist-100);
+  --field: var(--white);
+  --control: var(--white);
+  --control-hover: var(--mist-50);
+  --hover: rgba(15, 31, 23, 0.04);
 
-  --accent: var(--olive-500);
-  --accent-ink: var(--offwhite);
-  --accent-text: var(--olive-200);
-  --accent-wash: var(--olive-700);
-  --focus: var(--olive-200);
+  --glass: rgba(255, 255, 255, 0.8);
+  --glass-strong: rgba(255, 255, 255, 0.92);
+  --glass-highlight: rgba(255, 255, 255, 0.9);
+  --glow: rgba(111, 191, 142, 0.55);
+  --glow-soft: rgba(111, 191, 142, 0.18);
+  --accent-edge: rgba(15, 31, 23, 0.25);
+  --danger-line: rgba(168, 40, 63, 0.3);
+  --ambient: rgba(111, 191, 142, 0.26);
+  --ambient-2: rgba(217, 164, 65, 0.14);
+  --grid: rgba(15, 31, 23, 0.11);
+  --skeleton: rgba(15, 31, 23, 0.07);
+  --skeleton-shine: rgba(255, 255, 255, 0.75);
+  --ripple: rgba(15, 31, 23, 0.14);
+  --card-shadow: 0 1px 2px rgba(15, 31, 23, 0.04), 0 10px 28px -18px rgba(15, 31, 23, 0.3);
 
-  --income-text: var(--olive-200);
-  --expense-text: var(--terracotta-300);
-  --danger: var(--terracotta-300);
-  --danger-fill: var(--terracotta-300);
-  --danger-ink: var(--black);
-  --danger-wash: var(--terracotta-800);
+  --ink: var(--forest-950);
+  --ink-2: var(--olive-800);
+  --ink-3: var(--sage-600);
+  --line: var(--lichen-200);
+  --line-strong: var(--sage-500);
 
-  --status-good: var(--olive-200);
-  --status-good-wash: var(--olive-700);
-  --status-warning: var(--ochre-300);
-  --status-warning-wash: var(--ochre-800);
-  --status-critical: var(--terracotta-300);
-  --status-critical-wash: var(--terracotta-800);
-  --meter-good: var(--olive-200);
-  --meter-warning: var(--ochre-300);
-  --meter-critical: var(--terracotta-300);
-  --meter-goal: var(--offwhite);
-  --meter-track: var(--olive-900);
+  /* Botão principal em floresta; o "novo lançamento" em âmbar, como chamada de ação. */
+  --accent: var(--forest-900);
+  --accent-ink: var(--mist-50);
+  --accent-text: var(--moss-700);
+  --accent-wash: #e3ece4;
+  --focus: var(--amber-800);
+  --cta: var(--amber-500);
+  --cta-hover: var(--amber-600);
+  --cta-ink: var(--forest-950);
+  --cta-edge: var(--amber-800);
 
-  --toast-surface: var(--offwhite);
-  --toast-ink: var(--black);
+  --income-text: var(--green-700);
+  --expense-text: var(--rust-700);
+  --danger: var(--wine-700);
+  --danger-fill: var(--wine-700);
+  --danger-ink: var(--white);
+  --danger-wash: #f6e3e6;
+
+  --status-good: var(--green-700);
+  --status-good-wash: #e1efe6;
+  --status-warning: var(--amber-800);
+  --status-warning-wash: var(--amber-100);
+  --status-critical: var(--wine-700);
+  --status-critical-wash: #f6e3e6;
+  --meter-good: var(--green-700);
+  --meter-warning: #9c7019;
+  --meter-critical: var(--rust-700);
+  --meter-goal: var(--forest-900);
+  --meter-track: var(--lichen-100);
+
+  --toast-surface: var(--forest-950);
+  --toast-ink: var(--mist-50);
 
   /*
-   * Categorias nos gráficos: tons terrosos com o rótulo em preto por cima. A claridade varia de propósito:
-   * é o que mantém as oito cores separadas para quem tem daltonismo (protanopia, deuteranopia e tritanopia).
+   * Categorias nos gráficos, com o rótulo em branco por cima. A claridade varia de propósito:
+   * é o que mantém as oito cores separadas para quem tem daltonismo.
    */
-  --series-1: #81884c;
-  --series-2: #c19886;
-  --series-3: #46bdc0;
-  --series-4: #edd597;
-  --series-5: #d8c2ff;
-  --series-6: #b3e3be;
-  --series-7: #5089b5;
-  --series-8: #b86d8a;
-  --series-other: var(--sage-300);
-  --series-ink: var(--black);
-  --flow-in: var(--olive-200);
-  --flow-out: var(--terracotta-300);
-  --rule-left: var(--olive-700);
-  --rule-left-ink: var(--offwhite);
-
-  --axis-grid: rgba(154, 156, 140, 0.16);
-  --axis-base: var(--sage-400);
-  --axis-text: var(--sage-300);
-
-  /* A cédula é verde-oliva; só fica terracota quando o mês fecha faltando. */
-  --note-paper: var(--olive-800);
-  --note-paper-2: var(--olive-900);
-  --note-line: rgba(154, 156, 140, 0.22);
-  --note-rosette: rgba(197, 204, 171, 0.5);
-  --note-ink: var(--offwhite);
-  --note-ink-2: var(--sage-200);
-  --note-gold: var(--olive-200);
-  --note-value-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
-  --note-short-paper: var(--terracotta-700);
-  --note-short-paper-2: var(--terracotta-900);
-  --note-short-line: rgba(232, 233, 225, 0.18);
-  --note-short-rosette: rgba(232, 233, 225, 0.5);
-  --note-short-ink: var(--offwhite);
-  --note-short-ink-2: #ebcfc2;
-  --note-short-gold: var(--offwhite);
-  --note-short-value-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
-
-  --shadow-note: 0 0 0 1px var(--line), 0 14px 30px -18px rgba(0, 0, 0, 0.9);
-  --shadow-float: 0 12px 34px -12px rgba(0, 0, 0, 0.8);
-  --shadow-control: 0 1px 2px rgba(0, 0, 0, 0.6);
-  --backdrop: rgba(0, 0, 0, 0.7);
-}
-
-/* Tema claro, opcional: a mesma paleta de cabeça para baixo. */
-:root[data-theme='light'] {
-  color-scheme: light;
-
-  --paper: #f3f4ee;
-  --surface-solid: #ffffff;
-  --surface-sunken: var(--offwhite);
-  --field: #ffffff;
-  --control: #ffffff;
-  --control-hover: var(--offwhite);
-  --hover: rgba(48, 50, 42, 0.06);
-  --glass: rgba(255, 255, 255, 0.66);
-  --glass-strong: rgba(255, 255, 255, 0.9);
-  --glass-highlight: rgba(255, 255, 255, 0.6);
-  --glow: rgba(92, 97, 80, 0.45);
-  --glow-soft: rgba(92, 97, 80, 0.2);
-  --accent-edge: rgba(48, 50, 42, 0.25);
-  --danger-line: rgba(143, 69, 38, 0.3);
-  --ambient: rgba(154, 156, 140, 0.4);
-  --ambient-2: rgba(92, 97, 80, 0.16);
-  --grid: rgba(92, 97, 80, 0.06);
-  --skeleton: rgba(92, 97, 80, 0.13);
-  --skeleton-shine: rgba(255, 255, 255, 0.6);
-  --ripple: rgba(48, 50, 42, 0.16);
-  --ink: var(--olive-900);
-  --ink-2: var(--olive-700);
-  --ink-3: var(--olive-500);
-  --line: rgba(92, 97, 80, 0.24);
-  --line-strong: var(--sage-400);
-
-  --accent-ink: #ffffff;
-  --accent-text: var(--olive-600);
-  --accent-wash: #dde0d2;
-  --focus: var(--olive-500);
-
-  --income-text: #47552a;
-  --expense-text: #8f4526;
-  --danger: #8f4526;
-  --danger-fill: #8f4526;
-  --danger-ink: #ffffff;
-  --danger-wash: #f1ddd3;
-
-  --status-good: #47552a;
-  --status-good-wash: #dfe5cc;
-  --status-warning: #6b5310;
-  --status-warning-wash: #f0e6c4;
-  --status-critical: #8f4526;
-  --status-critical-wash: #f1ddd3;
-  --meter-good: #5f6f2e;
-  --meter-warning: #8a6a12;
-  --meter-critical: #a8502e;
-  --meter-goal: var(--olive-800);
-  --meter-track: #dcded3;
-
-  --toast-surface: var(--olive-800);
-  --toast-ink: var(--offwhite);
-
   --series-1: #3e4500;
   --series-2: #5d3629;
   --series-3: #068281;
@@ -221,27 +137,126 @@
   --series-7: #0e426f;
   --series-8: #7e2f51;
   --series-other: #6f7264;
-  --series-ink: #ffffff;
-  --flow-in: #3e4500;
-  --flow-out: #b5613c;
-  --rule-left: #dcded3;
-  --rule-left-ink: var(--olive-900);
+  --series-ink: var(--white);
+  --flow-in: var(--green-700);
+  --flow-out: var(--rust-700);
+  --rule-left: var(--lichen-100);
+  --rule-left-ink: var(--forest-950);
 
-  --axis-grid: rgba(92, 97, 80, 0.16);
-  --axis-base: var(--sage-400);
-  --axis-text: var(--olive-500);
+  --axis-grid: rgba(15, 31, 23, 0.08);
+  --axis-base: var(--sage-500);
+  --axis-text: var(--sage-600);
 
-  --note-paper: #ffffff;
-  --note-paper-2: #eef0e6;
-  --note-line: rgba(92, 97, 80, 0.2);
-  --note-rosette: rgba(92, 97, 80, 0.55);
-  --note-ink: var(--olive-900);
-  --note-ink-2: var(--olive-700);
-  --note-gold: var(--olive-500);
-  --note-value-shadow: none;
+  /* A cédula é um bloco floresta, com o desenho em menta e âmbar; fica ferrugem quando o mês fecha faltando. */
+  --note-paper: var(--forest-900);
+  --note-paper-2: var(--forest-950);
+  --note-line: rgba(111, 191, 142, 0.16);
+  --note-rosette: rgba(111, 191, 142, 0.55);
+  --note-ink: var(--mist-50);
+  --note-ink-2: var(--lichen-200);
+  --note-gold: var(--amber-400);
+  --note-value-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+  --note-short-paper: #7a3416;
+  --note-short-paper-2: #3f1a0c;
+  --note-short-line: rgba(244, 245, 239, 0.16);
+  --note-short-rosette: rgba(244, 245, 239, 0.5);
+  --note-short-ink: var(--mist-50);
+  --note-short-ink-2: #f1d2c2;
+  --note-short-gold: var(--amber-400);
+  --note-short-value-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 
-  --shadow-note: 0 0 0 1px var(--line), 0 14px 30px -18px rgba(48, 50, 42, 0.45);
-  --shadow-float: 0 12px 34px -12px rgba(48, 50, 42, 0.4);
-  --shadow-control: 0 1px 2px rgba(48, 50, 42, 0.25);
-  --backdrop: rgba(28, 29, 24, 0.5);
+  --shadow-note: 0 1px 0 rgba(255, 255, 255, 0.06) inset, 0 24px 48px -24px rgba(15, 31, 23, 0.55);
+  --shadow-float: 0 18px 40px -16px rgba(15, 31, 23, 0.35);
+  --shadow-control: 0 1px 2px rgba(15, 31, 23, 0.18);
+  --backdrop: rgba(15, 31, 23, 0.45);
+}
+
+/* Tema escuro, opcional: a mesma família em floresta profunda. */
+:root[data-theme='dark'] {
+  color-scheme: dark;
+
+  --paper: #0b0f0d;
+  --surface-solid: #14201a;
+  --surface-sunken: #0f1813;
+  --field: #0f1813;
+  --control: #1b2a22;
+  --control-hover: #23362c;
+  --hover: rgba(244, 245, 239, 0.05);
+
+  --glass: rgba(20, 32, 26, 0.78);
+  --glass-strong: rgba(15, 24, 19, 0.92);
+  --glass-highlight: rgba(244, 245, 239, 0.05);
+  --glow: rgba(111, 191, 142, 0.5);
+  --glow-soft: rgba(111, 191, 142, 0.16);
+  --accent-edge: rgba(143, 211, 168, 0.35);
+  --danger-line: rgba(240, 138, 154, 0.3);
+  --ambient: rgba(111, 191, 142, 0.16);
+  --ambient-2: rgba(217, 164, 65, 0.08);
+  --grid: rgba(199, 203, 184, 0.09);
+  --skeleton: rgba(199, 203, 184, 0.1);
+  --skeleton-shine: rgba(244, 245, 239, 0.08);
+  --ripple: rgba(244, 245, 239, 0.2);
+  --card-shadow: 0 1px 0 rgba(244, 245, 239, 0.03) inset, 0 12px 30px -18px rgba(0, 0, 0, 0.8);
+
+  --ink: var(--mist-50);
+  --ink-2: var(--lichen-200);
+  --ink-3: #9aa58f;
+  --line: rgba(199, 203, 184, 0.14);
+  --line-strong: var(--sage-500);
+
+  --accent: var(--mint-300);
+  --accent-ink: var(--forest-950);
+  --accent-text: var(--mint-200);
+  --accent-wash: var(--forest-900);
+  --focus: var(--amber-400);
+  --cta: var(--amber-400);
+  --cta-hover: var(--amber-500);
+  --cta-ink: var(--forest-950);
+  --cta-edge: var(--amber-600);
+
+  --income-text: var(--mint-300);
+  --expense-text: var(--rust-300);
+  --danger: var(--wine-300);
+  --danger-fill: var(--wine-300);
+  --danger-ink: var(--forest-950);
+  --danger-wash: #3a1a20;
+
+  --status-good: var(--mint-200);
+  --status-good-wash: var(--forest-900);
+  --status-warning: var(--amber-400);
+  --status-warning-wash: #3a2f15;
+  --status-critical: var(--wine-300);
+  --status-critical-wash: #3a1a20;
+  --meter-good: var(--mint-300);
+  --meter-warning: var(--amber-400);
+  --meter-critical: var(--rust-300);
+  --meter-goal: var(--mist-50);
+  --meter-track: #1b2a22;
+
+  --toast-surface: var(--mist-50);
+  --toast-ink: var(--forest-950);
+
+  --series-1: #81884c;
+  --series-2: #c19886;
+  --series-3: #46bdc0;
+  --series-4: #edd597;
+  --series-5: #d8c2ff;
+  --series-6: #b3e3be;
+  --series-7: #5089b5;
+  --series-8: #b86d8a;
+  --series-other: #9aa58f;
+  --series-ink: var(--black);
+  --flow-in: var(--mint-300);
+  --flow-out: var(--rust-300);
+  --rule-left: var(--forest-900);
+  --rule-left-ink: var(--mist-50);
+
+  --axis-grid: rgba(199, 203, 184, 0.1);
+  --axis-base: var(--sage-500);
+  --axis-text: #9aa58f;
+
+  --shadow-note: 0 0 0 1px rgba(199, 203, 184, 0.1), 0 24px 48px -24px rgba(0, 0, 0, 0.9);
+  --shadow-float: 0 18px 40px -16px rgba(0, 0, 0, 0.8);
+  --shadow-control: 0 1px 2px rgba(0, 0, 0, 0.6);
+  --backdrop: rgba(0, 0, 0, 0.6);
 }

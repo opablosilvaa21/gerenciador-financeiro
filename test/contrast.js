@@ -44,6 +44,7 @@ const PAIRS = [
   ['--expense-text', SURFACES, 4.5],
   ['--danger', SURFACES, 4.5],
   ['--accent-ink', ['--accent'], 4.5],
+  ['--cta-ink', ['--cta', '--cta-hover'], 4.5],
   ['--danger-ink', ['--danger-fill'], 4.5],
   ['--status-good', ['--status-good-wash'], 4.5],
   ['--status-warning', ['--status-warning-wash'], 4.5],
@@ -73,8 +74,9 @@ const PAIRS = [
 ];
 
 function check() {
-  const dark = readTokens(':root');
-  const light = readTokens(":root[data-theme='light']", dark.raw);
+  // O claro é o padrão (:root); o escuro herda dele e troca o que precisa.
+  const light = readTokens(':root');
+  const dark = readTokens(":root[data-theme='dark']", light.raw);
   const failures = [];
   const lines = [];
   for (const [theme, { resolved }] of [['escuro', dark], ['claro', light]]) {

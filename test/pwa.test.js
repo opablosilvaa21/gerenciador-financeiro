@@ -19,7 +19,7 @@ test('tudo o que a página carrega está na lista offline', () => {
   const used = [...html.matchAll(/<(?:script src|link rel="stylesheet" href)="([^"]+)"/g)].map((m) => m[1]);
   assert.ok(used.length > 10);
   const fonts = [...read('css/tokens.css').matchAll(/url\('\.\.\/([^']+)'\)/g)].map((m) => m[1]);
-  assert.equal(fonts.length, 2);
+  assert.equal(fonts.length, 3);
   const list = swFiles();
   for (const file of [...used, ...fonts, './', 'index.html', 'manifest.webmanifest']) {
     assert.ok(list.includes(file), `${file} não abre sem internet`);

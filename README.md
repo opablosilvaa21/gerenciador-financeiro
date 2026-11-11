@@ -1,7 +1,7 @@
 # Sobra
 
 Gerenciador financeiro pessoal que roda direto no navegador. O resultado de cada mês aparece em uma cédula
-com o valor que sobra; se o mês fechar faltando, a cédula muda de verde-oliva para terracota.
+com o valor que sobra; se o mês fechar faltando, a cédula muda de verde floresta para ferrugem.
 
 **Abrir o app:** https://opablosilvaa21.github.io/gerenciador-financeiro/
 
@@ -32,7 +32,7 @@ em quando em **Ajustes**. Para levar os dados a outro lugar, restaure esse backu
 - **Contas fixas:** o lançamento do mês é criado sozinho como pendente; dá para pausar e retomar.
 - **Metas:** quanto falta e quanto guardar por mês para chegar no prazo.
 - **Relatórios:** comparação por período e por categoria; todo gráfico também tem visão em tabela.
-- **Ajustes:** tema escuro (padrão) ou claro, categorias, backup, importação de extrato em CSV e a escolha de
+- **Ajustes:** tema claro (padrão) ou escuro, categorias, backup, importação de extrato em CSV e a escolha de
   participar ou não da contagem anônima de aparelhos.
 
 Quase toda alteração pode ser desfeita, pelo aviso na tela ou com `Ctrl + Z`.
@@ -67,8 +67,8 @@ Decisões que valem saber:
   mais curtos.
 - **Texto digitado nunca vira HTML.** A tela é montada com nós de texto, e o CSV exportado neutraliza fórmulas.
 - **Só `store.js` altera os dados.** É o que permite gravar e desfazer em um lugar só.
-- **Uma paleta só, em `css/tokens.css`.** Preto, dois verdes-oliva e um sálvia, com terracota e ocre discretos para
-  despesa e avisos. Nenhuma cor fica solta no código, e `npm test` confere o contraste de cada par de texto e fundo
+- **Uma paleta só, em `css/tokens.css`.** Névoa clara, verde floresta, líquen, menta e âmbar, com ferrugem para
+  despesa e vinho para erro. Nenhuma cor fica solta no código, e `npm test` confere o contraste de cada par de texto e fundo
   (WCAG AA) nos dois temas.
 - **Cores dos gráficos separadas também para daltonismo**, em claro e em escuro: a claridade varia entre as oito
   categorias. A cor segue a categoria, e nenhuma informação depende só de cor.
@@ -124,4 +124,5 @@ Se o Chrome estiver em outro lugar, informe o caminho na variável `CHROME_PATH`
 - Não há fatura de cartão de crédito: uma compra parcelada é lançada como parcelas mensais.
 - Os gráficos têm 8 cores, uma por categoria de despesa; além disso, a categoria aparece em sálvia.
 
-As fontes Space Grotesk (textos) e JetBrains Mono (valores) estão em `assets/fonts`, sob a licença SIL Open Font License.
+As fontes Fraunces (títulos), Inter (textos) e JetBrains Mono (valores) estão em `assets/fonts`, sob a licença SIL
+Open Font License.

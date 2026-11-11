@@ -52,6 +52,8 @@ async function main() {
         const button = [...document.querySelectorAll('button')].find((b) => b.textContent.includes('dados de exemplo'));
         button?.click();
       });
+      // Os dados de exemplo trocam o estado inteiro, tema incluído: escolhe de novo.
+      await page.evaluate((theme) => FM.app?.store.setTheme(theme), scheme);
       await delay(300);
       for (const route of ROUTES) {
         await page.goto(`${URL_APP}#/${route}`, { waitUntil: 'networkidle0' });

@@ -78,8 +78,8 @@
   }
 
   function applyTheme() {
-    // O escuro é o padrão; o claro só entra quando a pessoa escolhe.
-    document.documentElement.dataset.theme = store.state.theme === 'light' ? 'light' : 'dark';
+    // O claro (névoa) é o padrão; o escuro (floresta) só entra quando a pessoa escolhe.
+    document.documentElement.dataset.theme = store.state.theme === 'dark' ? 'dark' : 'light';
     barColor.content = getComputedStyle(document.documentElement).getPropertyValue('--paper').trim();
   }
 

@@ -85,6 +85,10 @@ const box = (selector) => page.$eval(selector, (n) => {
   await page.setViewport(PHONE);
   // O pedido real de instalação não abre janela em teste: o caminho sem pedido e o com pedido são provados à parte.
   await page.evaluateOnNewDocument(() => {
+    // A contagem de instalações tem teste próprio (installs.js); aqui ela fica recusada e nada sai para o Supabase.
+    try {
+      localStorage.setItem('sobra.aparelho.consentimento', 'recusado');
+    } catch {}
     window.addEventListener('beforeinstallprompt', (event) => {
       if (!event.simulated) event.stopImmediatePropagation();
     }, true);
@@ -168,14 +172,14 @@ const box = (selector) => page.$eval(selector, (n) => {
     assert.equal(hit, true);
   });
   await step('a escolha de tema colore a barra do sistema', async () => {
-    // O escuro é o padrão, mesmo com o sistema em claro.
-    assert.equal(await page.$eval('meta[name="theme-color"]', (n) => n.content), '#000000');
-    await page.evaluate(() => FM.app.store.setTheme('light'));
-    await delay(40);
-    assert.equal(await page.$eval('meta[name="theme-color"]', (n) => n.content), '#f3f4ee');
+    // O claro (névoa) é o padrão; o escuro é escolhido em Ajustes.
+    assert.equal(await page.$eval('meta[name="theme-color"]', (n) => n.content), '#f4f5ef');
     await page.evaluate(() => FM.app.store.setTheme('dark'));
     await delay(40);
-    assert.equal(await page.$eval('meta[name="theme-color"]', (n) => n.content), '#000000');
+    assert.equal(await page.$eval('meta[name="theme-color"]', (n) => n.content), '#0b0f0d');
+    await page.evaluate(() => FM.app.store.setTheme('light'));
+    await delay(40);
+    assert.equal(await page.$eval('meta[name="theme-color"]', (n) => n.content), '#f4f5ef');
   });
   await step('os atalhos de teclado saem dos Ajustes', async () => {
     await go('ajustes');

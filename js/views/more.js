@@ -387,9 +387,9 @@
         { class: 'band card' },
         el('div', { class: 'band-head' }, el('h2', {}, 'Aparência')),
         segmented('tema', 'Tema', [
-          { value: 'dark', label: 'Escuro' },
           { value: 'light', label: 'Claro' },
-        ], state.theme === 'light' ? 'light' : 'dark', (value) => store.setTheme(value)),
+          { value: 'dark', label: 'Escuro' },
+        ], state.theme === 'dark' ? 'dark' : 'light', (value) => store.setTheme(value)),
       ),
       el(
         'section',
@@ -397,7 +397,7 @@
         el('div', { class: 'band-head' }, el('h2', {}, 'Categorias')),
         categoryList(ctx, 'expense', 'Despesas'),
         categoryList(ctx, 'income', 'Receitas'),
-        el('p', { class: 'field-hint' }, 'Os gráficos têm 8 cores, uma por categoria de despesa. Categorias além disso aparecem em sálvia.'),
+        el('p', { class: 'field-hint' }, 'Os gráficos têm 8 cores, uma por categoria de despesa. Categorias além disso aparecem em cinza-sálvia.'),
       ),
       el(
         'section',

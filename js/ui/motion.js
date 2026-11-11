@@ -111,13 +111,55 @@
     }, 4000);
   }
 
+  /** Quebra o título em palavras para cada uma sair do desfoque na sua vez. O texto lido continua o mesmo. */
+  function splitTitle(view) {
+    const title = view.querySelector('h1');
+    if (!title || title.dataset.split || title.children.length) return;
+    title.dataset.split = '1';
+    const parts = title.textContent.split(/(\s+)/);
+    let index = 0;
+    title.replaceChildren(...parts.map((part) => {
+      if (!part.trim()) return doc.createTextNode(part);
+      const word = doc.createElement('span');
+      word.className = 'w';
+      word.style.setProperty('--i', String(index++));
+      word.textContent = part;
+      return word;
+    }));
+  }
+
+  /** Cartões abaixo da dobra esperam escondidos e entram quando a pessoa rola até eles. */
+  function appear(view) {
+    if (!('IntersectionObserver' in root)) return;
+    const fold = root.innerHeight;
+    const cards = [...view.querySelectorAll('.card, .goal, .empty')].filter((node) => node.getBoundingClientRect().top > fold);
+    if (!cards.length) return;
+    const observer = new IntersectionObserver((entries) => {
+      for (const entry of entries) {
+        if (!entry.isIntersecting) continue;
+        observer.unobserve(entry.target);
+        entry.target.dataset.appear = 'in';
+        setTimeout(() => entry.target.removeAttribute('data-appear'), 900);
+      }
+    }, { threshold: 0.12, rootMargin: '0px 0px -6% 0px' });
+    for (const card of cards) {
+      card.dataset.appear = 'wait';
+      observer.observe(card);
+    }
+    setTimeout(() => {
+      if (!view.isConnected) observer.disconnect();
+    }, 4000);
+  }
+
   /** Chamado quando uma tela abre (troca de rota ou primeira abertura), não a cada alteração nos dados. */
   function enter(view) {
     if (!view || reduced()) return;
+    splitTitle(view);
     view.classList.add('is-entering');
-    setTimeout(() => view.classList.remove('is-entering'), ENTER_MS);
+    setTimeout(() => view.classList.remove('is-entering'), ENTER_MS + 600);
     countUp(view);
     reveal(view);
+    appear(view);
   }
 
   /** Vibração curta de confirmação. Só existe em alguns aparelhos (não no iPhone); onde não há, não faz nada. */
