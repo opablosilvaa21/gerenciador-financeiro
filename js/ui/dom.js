@@ -67,6 +67,7 @@
     target: 'M12 21a9 9 0 1 1 0-18 9 9 0 0 1 0 18zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8z',
     chart: 'M4 20h16M7 16v-5M12 16V6M17 16V9',
     sliders: 'M4 7h9M17 7h3M4 17h3M11 17h9M15 5v4M9 15v4',
+    inbox: 'M4 13l2.5-8h11L20 13M4 13v6h16v-6M4 13h4.5a3.5 3.5 0 0 0 7 0H20',
   };
 
   function icon(name, size = 18) {
@@ -74,6 +75,19 @@
       'svg',
       { viewBox: '0 0 24 24', width: size, height: size, fill: 'none', stroke: 'currentColor', 'stroke-width': 2, 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'aria-hidden': 'true', class: 'icon' },
       svg('path', { d: ICONS[name] }),
+    );
+  }
+
+  /** Blocos no lugar do conteúdo enquanto ele não chega, para a tela não ficar vazia nem pular. */
+  function skeleton(label = 'Carregando') {
+    const block = (kind) => el('span', { class: `sk sk-${kind}` });
+    return el(
+      'div',
+      { class: 'skeleton', role: 'status', 'aria-label': label },
+      block('title'),
+      block('hero'),
+      el('div', { class: 'sk-row' }, block('card'), block('card'), block('card'), block('card')),
+      block('block'),
     );
   }
 
@@ -314,5 +328,5 @@
     input.click();
   }
 
-  FM.dom = { el, svg, icon, toast, openDialog, confirmDialog, field, segmented, tip, withTip, download, pickFile };
+  FM.dom = { el, svg, icon, skeleton, toast, openDialog, confirmDialog, field, segmented, tip, withTip, download, pickFile };
 })(globalThis);

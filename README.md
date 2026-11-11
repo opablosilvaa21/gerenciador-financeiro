@@ -49,7 +49,7 @@ HTML, CSS e JavaScript puros, sem framework e sem etapa de build.
 
 ```
 js/core    regras sem interface: dinheiro, datas, dados e cálculos
-js/ui      peças de tela: elementos, gráficos em SVG, cédula, formulário e instalação
+js/ui      peças de tela: elementos, gráficos em SVG, cédula, formulário, microinterações e instalação
 js/views   uma função para cada tela
 css        tokens.css (cores e fontes) e app.css
 sw.js      guarda uma cópia do app para abrir sem internet
@@ -93,4 +93,4 @@ Se o Chrome estiver em outro lugar, informe o caminho na variável `CHROME_PATH`
 - Não há fatura de cartão de crédito: uma compra parcelada é lançada como parcelas mensais.
 - Os gráficos têm 8 cores, uma por categoria de despesa; além disso, a categoria aparece em sálvia.
 
-As fontes Bodoni Moda e Public Sans estão em `assets/fonts`, sob a licença SIL Open Font License.
+As fontes Space Grotesk (textos) e JetBrains Mono (valores) estão em `assets/fonts`, sob a licença SIL Open Font License.

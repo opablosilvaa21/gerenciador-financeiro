@@ -63,7 +63,7 @@
     render();
     return el(
       'section',
-      { class: 'chart' },
+      { class: 'chart card' },
       el(
         'header',
         { class: 'chart-head' },
@@ -224,7 +224,7 @@
             const value = d[s.key];
             if (value <= 0) return;
             const x = center + (index === 0 ? -barW - 1 : 1);
-            group.append(svg('path', { d: columnPath(x, y(value), barW, y(0) - y(value)), fill: s.color, class: 'bar' }));
+            group.append(svg('path', { d: columnPath(x, y(value), barW, y(0) - y(value)), fill: s.color, class: 'bar', style: { '--d': String(i) } }));
           });
           if (i % labelEvery === (data.length - 1) % labelEvery) {
             group.append(svg('text', { x: center, y: height - 8, 'text-anchor': 'middle', class: `axis-text${isSelected ? ' axis-strong' : ''}` }, dates.monthShort(d.month)));
@@ -289,7 +289,7 @@
 
         const line = data.map((d, i) => `${i ? 'L' : 'M'}${x(i).toFixed(1)} ${y(d.balance).toFixed(1)}`).join('');
         root.append(svg('path', { d: `${line}L${x(data.length - 1)} ${y(Math.max(bottom, 0))}L${x(0)} ${y(Math.max(bottom, 0))}Z`, class: 'line-area' }));
-        root.append(svg('path', { d: line, class: 'line-stroke' }));
+        root.append(svg('path', { d: line, class: 'line-stroke', pathLength: 1 }));
 
         const lastIndex = data.length - 1;
         root.append(svg('circle', { cx: x(lastIndex), cy: y(values[lastIndex]), r: 5, class: 'line-dot' }));
@@ -371,10 +371,10 @@
       el(
         'ul',
         { class: 'ranking' },
-        items.map((item) => {
+        items.map((item, index) => {
           const content = el(
             'span',
-            { class: 'ranking-line' },
+            { class: 'ranking-line', style: { '--d': String(index) } },
             el('span', { class: 'ranking-name' }, item.category.name),
             el('span', { class: 'ranking-track' }, el('span', {
               class: 'ranking-bar',

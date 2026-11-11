@@ -26,7 +26,14 @@
     <div class="content">
       <a class="brand brand-top" href="#/inicio">Sobra</a>
       <div id="banners"></div>
-      <main id="main" tabindex="-1"></main>
+      <main id="main" tabindex="-1">
+        <div class="skeleton" role="status" aria-label="Carregando">
+          <span class="sk sk-title"></span>
+          <span class="sk sk-hero"></span>
+          <div class="sk-row"><span class="sk sk-card"></span><span class="sk sk-card"></span><span class="sk sk-card"></span><span class="sk sk-card"></span></div>
+          <span class="sk sk-block"></span>
+        </div>
+      </main>
     </div>
   </div>
   <nav id="tabbar" class="tabbar" aria-label="Principal"></nav>
@@ -39,6 +46,7 @@
   <script src="js/core/queries.js"></script>
   <script src="js/core/demo.js"></script>
   <script src="js/ui/dom.js"></script>
+  <script src="js/ui/motion.js"></script>
   <script src="js/ui/charts.js"></script>
   <script src="js/ui/note.js"></script>
   <script src="js/ui/common.js"></script>

@@ -84,7 +84,7 @@
   function renderNav(route) {
     nav.replaceChildren(
       ...ROUTES.map((r) =>
-        el('a', { href: `#/${r.key}`, class: 'nav-link', 'aria-current': r.key === route.key ? 'page' : null }, r.label),
+        el('a', { href: `#/${r.key}`, class: 'nav-link', 'aria-current': r.key === route.key ? 'page' : null }, FM.dom.icon(r.icon, 18), el('span', {}, r.label)),
       ),
     );
     renderTabbar(route);
@@ -232,8 +232,11 @@
   }
 
   let wasOnboarding = false;
+  let booted = false;
 
   function render({ keepFocus = false, fromRoute = false } = {}) {
+    const firstRender = !booted;
+    booted = true;
     applyTheme();
     tip.hide();
     document.body.classList.toggle('is-onboarding', !store.state.onboarded);
@@ -243,6 +246,7 @@
       wasOnboarding = true;
       nav.replaceChildren();
       renderOnboarding();
+      if (firstRender) FM.motion.enter(main.firstElementChild);
       return;
     }
 
@@ -262,6 +266,8 @@
     const scroll = window.scrollY;
     const view = FM.views[route.view](ctx);
     main.replaceChildren(view);
+    // A tela só "entra" ao abrir ou trocar de rota; salvar um dado redesenha sem animar de novo.
+    if (firstRender || !keepFocus) FM.motion.enter(view);
     document.title = `${route.label} | Sobra`;
 
     if (keepFocus) {

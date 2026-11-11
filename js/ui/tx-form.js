@@ -264,11 +264,13 @@
         const { repeat: _ignored, ...changes } = data;
         handle.close();
         store.updateTransaction(tx.id, changes);
+        FM.motion.haptic();
         ctx.notify('Lançamento alterado');
         return;
       }
       if (addAnother) {
         store.addTransaction(data);
+        FM.motion.haptic();
         ctx.notify('Lançamento salvo');
         amountInput.value = '';
         descInput.value = '';
@@ -278,6 +280,7 @@
       }
       handle.close();
       store.addTransaction(data);
+      FM.motion.haptic();
       const name = data.repeat.mode === 'installments' ? `${data.repeat.count} parcelas salvas` : 'Lançamento salvo';
       ctx.notify(name);
     }

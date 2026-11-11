@@ -98,8 +98,8 @@
           el('button', { class: 'button button-primary', type: 'button', dataset: { fk: 'nova-carteira' }, onclick: () => openAccountForm(ctx) }, icon('plus'), 'Nova carteira'),
         ],
       }),
-      el('p', { class: 'total-line' }, 'Somando tudo, você tem ', el('strong', {}, money.format(q.totalBalance(state))), ' hoje.'),
-      el('ul', { class: 'account-list' }, rows),
+      el('p', { class: 'total-line' }, 'Somando tudo, você tem ', el('strong', { dataset: { count: q.totalBalance(state) } }, money.format(q.totalBalance(state))), ' hoje.'),
+      el('ul', { class: 'account-list card' }, rows),
       el(
         'div',
         { class: 'chart-filter' },
@@ -167,19 +167,19 @@
         }),
       }),
       !hasData
-        ? common.emptyState('Ainda não há o que comparar', 'Os relatórios aparecem assim que houver lançamentos no período.', common.newButton(ctx))
+        ? common.emptyState('Ainda não há o que comparar', 'Os relatórios aparecem assim que houver lançamentos no período.', common.newButton(ctx), 'chart')
         : [
             el(
               'dl',
               { class: 'stats stats-row' },
-              el('div', { class: 'stat' }, el('dt', {}, 'Entrou'), el('dd', {}, el('strong', {}, money.format(income)))),
-              el('div', { class: 'stat' }, el('dt', {}, 'Saiu'), el('dd', {}, el('strong', {}, money.format(expense)))),
-              el('div', { class: 'stat' }, el('dt', {}, left < 0 ? 'Faltou' : 'Sobrou'), el('dd', {}, el('strong', {}, money.format(Math.abs(left))), rate != null && el('small', {}, `${rate}% do que entrou`))),
-              el('div', { class: 'stat' }, el('dt', {}, 'Média de gasto por mês'), el('dd', {}, el('strong', {}, money.format(Math.round(expense / reportRange))))),
+              common.stat('Entrou', income),
+              common.stat('Saiu', expense),
+              common.stat(left < 0 ? 'Faltou' : 'Sobrou', Math.abs(left), rate != null ? `${rate}% do que entrou` : null),
+              common.stat('Média de gasto por mês', Math.round(expense / reportRange)),
             ),
             insights.length > 0 && el(
               'section',
-              { class: 'band' },
+              { class: 'band card' },
               el('div', { class: 'band-head' }, el('h2', {}, `Sobre ${dates.monthName(month)}`)),
               el('ul', { class: 'insights' }, insights.map((item) => el('li', { class: `insight insight-${item.tone}` }, item.text))),
             ),
@@ -384,7 +384,7 @@
       common.pageHead('Ajustes'),
       el(
         'section',
-        { class: 'band' },
+        { class: 'band card' },
         el('div', { class: 'band-head' }, el('h2', {}, 'Aparência')),
         segmented('tema', 'Tema', [
           { value: 'dark', label: 'Escuro' },
@@ -393,7 +393,7 @@
       ),
       el(
         'section',
-        { class: 'band' },
+        { class: 'band card' },
         el('div', { class: 'band-head' }, el('h2', {}, 'Categorias')),
         categoryList(ctx, 'expense', 'Despesas'),
         categoryList(ctx, 'income', 'Receitas'),
@@ -401,7 +401,7 @@
       ),
       el(
         'section',
-        { class: 'band' },
+        { class: 'band card' },
         el(
           'div',
           { class: 'band-head' },
@@ -425,7 +425,7 @@
       ),
       FM.pwa.canOffer() && el(
         'section',
-        { class: 'band' },
+        { class: 'band card' },
         el(
           'div',
           { class: 'band-head' },
@@ -436,7 +436,7 @@
       ),
       el(
         'section',
-        { class: 'band band-shortcuts' },
+        { class: 'band card band-shortcuts' },
         el('div', { class: 'band-head' }, el('h2', {}, 'Atalhos de teclado')),
         el(
           'dl',
@@ -448,7 +448,7 @@
       ),
       el(
         'section',
-        { class: 'band band-danger' },
+        { class: 'band card band-danger' },
         el('div', { class: 'band-head' }, el('h2', {}, 'Recomeçar')),
         el(
           'div',

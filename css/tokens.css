@@ -4,23 +4,29 @@
  * Os pares de texto e fundo são conferidos por test/contrast.js (WCAG AA).
  */
 @font-face {
-  font-family: 'Bodoni Moda';
-  src: url('../assets/fonts/bodoni-moda.woff2') format('woff2');
-  font-weight: 400 700;
+  font-family: 'Space Grotesk';
+  src: url('../assets/fonts/space-grotesk.woff2') format('woff2');
+  font-weight: 300 700;
   font-display: swap;
 }
 @font-face {
-  font-family: 'Public Sans';
-  src: url('../assets/fonts/public-sans.woff2') format('woff2');
-  font-weight: 400 700;
+  font-family: 'JetBrains Mono';
+  src: url('../assets/fonts/jetbrains-mono.woff2') format('woff2');
+  font-weight: 100 800;
   font-display: swap;
 }
 
 :root {
   color-scheme: dark;
 
-  --font-text: 'Public Sans', system-ui, 'Segoe UI', sans-serif;
-  --font-figures: 'Bodoni Moda', 'Didot', 'Times New Roman', serif;
+  /* Textos em Space Grotesk; todo valor em R$ em JetBrains Mono, com algarismos da mesma largura. */
+  --font-text: 'Space Grotesk', system-ui, 'Segoe UI', sans-serif;
+  --font-display: var(--font-text);
+  --font-figures: 'JetBrains Mono', ui-monospace, 'Cascadia Mono', Consolas, monospace;
+
+  --radius-card: 16px;
+  --radius-control: 10px;
+  --blur: 14px;
 
   /* ---------- A paleta ---------- */
   --black: #000000;
@@ -53,6 +59,21 @@
   --control: var(--olive-700);
   --control-hover: var(--olive-600);
   --hover: rgba(232, 233, 225, 0.05);
+  /* Vidro: o verde-oliva escuro deixa passar o fundo desfocado. Nunca fica mais claro que --olive-800,
+     que é o fundo usado na conferência de contraste. */
+  --glass: rgba(48, 50, 42, 0.62);
+  --glass-strong: rgba(40, 42, 35, 0.88);
+  --glass-highlight: rgba(232, 233, 225, 0.05);
+  --glow: rgba(92, 97, 80, 0.7);
+  --glow-soft: rgba(92, 97, 80, 0.32);
+  --accent-edge: rgba(197, 204, 171, 0.3);
+  --danger-line: rgba(217, 154, 126, 0.3);
+  --ambient: rgba(92, 97, 80, 0.36);
+  --ambient-2: rgba(92, 97, 80, 0.2);
+  --grid: rgba(154, 156, 140, 0.055);
+  --skeleton: rgba(154, 156, 140, 0.13);
+  --skeleton-shine: rgba(232, 233, 225, 0.09);
+  --ripple: rgba(232, 233, 225, 0.22);
   --ink: var(--offwhite);
   --ink-2: var(--sage-200);
   --ink-3: var(--sage-300);
@@ -145,6 +166,19 @@
   --control: #ffffff;
   --control-hover: var(--offwhite);
   --hover: rgba(48, 50, 42, 0.06);
+  --glass: rgba(255, 255, 255, 0.66);
+  --glass-strong: rgba(255, 255, 255, 0.9);
+  --glass-highlight: rgba(255, 255, 255, 0.6);
+  --glow: rgba(92, 97, 80, 0.45);
+  --glow-soft: rgba(92, 97, 80, 0.2);
+  --accent-edge: rgba(48, 50, 42, 0.25);
+  --danger-line: rgba(143, 69, 38, 0.3);
+  --ambient: rgba(154, 156, 140, 0.4);
+  --ambient-2: rgba(92, 97, 80, 0.16);
+  --grid: rgba(92, 97, 80, 0.06);
+  --skeleton: rgba(92, 97, 80, 0.13);
+  --skeleton-shine: rgba(255, 255, 255, 0.6);
+  --ripple: rgba(48, 50, 42, 0.16);
   --ink: var(--olive-900);
   --ink-2: var(--olive-700);
   --ink-3: var(--olive-500);
