@@ -8,8 +8,6 @@
   const { money, dates } = FM;
 
   const seriesColor = (slot) => (slot == null ? 'var(--series-other)' : `var(--series-${slot + 1})`);
-  /** Rótulo dentro de um bloco colorido: branco, menos no amarelo. */
-  const labelOn = (slot) => (slot === 3 ? '#14222a' : '#ffffff');
 
   /** Redesenha quando a largura muda e para de observar quando o gráfico sai da tela. */
   function responsive(host, draw) {
@@ -145,7 +143,7 @@
             {
               class: 'rule-part',
               type: 'button',
-              style: { 'flex-grow': String(group.amount), background: seriesColor(group.slot), color: labelOn(group.slot) },
+              style: { 'flex-grow': String(group.amount), background: seriesColor(group.slot), color: 'var(--series-ink)' },
               'aria-label': `${group.name}: ${money.format(group.amount)}, ${percent(group.amount)} do total. Ver lançamentos`,
               onclick: () => onSelect(group.key),
             },
@@ -192,8 +190,8 @@
   /** Entradas e saídas por mês: colunas lado a lado, no mesmo eixo. */
   function cashflowChart(data, { selected = null, onSelect = null, height = 260 } = {}) {
     const series = [
-      { key: 'income', label: 'Entrou', color: 'var(--series-1)' },
-      { key: 'expense', label: 'Saiu', color: 'var(--series-2)' },
+      { key: 'income', label: 'Entrou', color: 'var(--flow-in)' },
+      { key: 'expense', label: 'Saiu', color: 'var(--flow-out)' },
     ];
     const chart = () =>
       responsive(el('div', { class: 'chart-canvas', style: { height: `${height}px` } }), (width) => {

@@ -1,7 +1,7 @@
 /*
- * Branco e vermelho no tema claro, preto e vermelho no escuro. O verde e o âmbar ficam só para situação
- * (recebido, dentro do limite, perto do limite). As cores dos gráficos foram validadas para daltonismo
- * contra estas superfícies, em claro e em escuro.
+ * Paleta "dress code": preto, dois verdes-oliva e um sálvia. Toda cor do app sai daqui.
+ * O tema escuro é o padrão; o claro só entra quando a pessoa escolhe em Ajustes.
+ * Os pares de texto e fundo são conferidos por test/contrast.js (WCAG AA).
  */
 @font-face {
   font-family: 'Bodoni Moda';
@@ -17,183 +17,197 @@
 }
 
 :root {
-  color-scheme: light;
+  color-scheme: dark;
 
   --font-text: 'Public Sans', system-ui, 'Segoe UI', sans-serif;
   --font-figures: 'Bodoni Moda', 'Didot', 'Times New Roman', serif;
 
-  --paper: #ffffff;
-  --surface: #ffffff;
-  --surface-sunken: #f2f2f2;
-  --ink: #161616;
-  --ink-2: #4a4a4a;
-  --ink-3: #636363;
-  --line: #e2e2e2;
-  --line-strong: #b5b5b5;
+  /* ---------- A paleta ---------- */
+  --black: #000000;
+  --olive-800: #30322a;
+  --olive-500: #5c6150;
+  --sage-300: #9a9c8c;
+  --offwhite: #e8e9e1;
 
-  --accent: #d10f1c;
-  --accent-ink: #ffffff;
-  --accent-wash: #fde9ea;
-  --focus: #d10f1c;
+  /* Tons derivados dela: mais escuros e mais claros do mesmo verde. */
+  --olive-900: #1c1d18;
+  --olive-700: #3b3e34;
+  --olive-600: #474b3e;
+  --olive-200: #c5ccab;
+  --sage-400: #80846f;
+  --sage-200: #b9bbad;
+  /* Terracota e ocre discretos, só para despesa, falta e avisos. */
+  --terracotta-300: #d99a7e;
+  --terracotta-700: #6b3a28;
+  --terracotta-800: #4a2e22;
+  --terracotta-900: #3a2219;
+  --ochre-300: #d9bc74;
+  --ochre-800: #3f3620;
 
-  --income-text: #0c6b3f;
-  --danger: #a80a14;
-  --danger-wash: #fbe3e4;
+  /* ---------- Papéis ---------- */
+  --paper: var(--black);
+  --surface-solid: var(--olive-800);
+  --surface: var(--surface-solid);
+  --surface-sunken: var(--olive-900);
+  --field: var(--olive-900);
+  --control: var(--olive-700);
+  --control-hover: var(--olive-600);
+  --hover: rgba(232, 233, 225, 0.05);
+  --ink: var(--offwhite);
+  --ink-2: var(--sage-200);
+  --ink-3: var(--sage-300);
+  --line: rgba(154, 156, 140, 0.2);
+  --line-strong: var(--sage-400);
 
-  --status-good: #0c7a2c;
-  --status-good-wash: #dff1e2;
-  --status-warning: #8a5a00;
-  --status-warning-wash: #f9edd0;
-  --status-critical: #a80a14;
-  --status-critical-wash: #fbe3e4;
-  --meter-good: #1c8f3c;
-  --meter-warning: #e5a50f;
-  --meter-critical: #d03b3b;
-  --meter-goal: #161616;
-  --meter-track: #e8e8e8;
+  --accent: var(--olive-500);
+  --accent-ink: var(--offwhite);
+  --accent-text: var(--olive-200);
+  --accent-wash: var(--olive-700);
+  --focus: var(--olive-200);
 
-  --series-1: #2a78d6;
-  --series-2: #eb6834;
-  --series-3: #1baf7a;
-  --series-4: #eda100;
-  --series-5: #e87ba4;
-  --series-6: #008300;
-  --series-7: #6250d6;
-  --series-8: #e34948;
-  --series-other: #8f8f8f;
-  --rule-left: #e6e6e6;
-  --rule-left-ink: #3a3a3a;
+  --income-text: var(--olive-200);
+  --expense-text: var(--terracotta-300);
+  --danger: var(--terracotta-300);
+  --danger-fill: var(--terracotta-300);
+  --danger-ink: var(--black);
+  --danger-wash: var(--terracotta-800);
 
-  --axis-grid: #ececec;
-  --axis-base: #bdbdbd;
-  --axis-text: #636363;
+  --status-good: var(--olive-200);
+  --status-good-wash: var(--olive-700);
+  --status-warning: var(--ochre-300);
+  --status-warning-wash: var(--ochre-800);
+  --status-critical: var(--terracotta-300);
+  --status-critical-wash: var(--terracotta-800);
+  --meter-good: var(--olive-200);
+  --meter-warning: var(--ochre-300);
+  --meter-critical: var(--terracotta-300);
+  --meter-goal: var(--offwhite);
+  --meter-track: var(--olive-900);
 
-  /* A cédula é papel com tinta vermelha; só fica toda vermelha quando o mês fecha faltando. */
-  --note-paper: #ffffff;
-  --note-paper-2: #fbf6f6;
-  --note-line: rgba(209, 15, 28, 0.2);
-  --note-rosette: rgba(209, 15, 28, 0.6);
-  --note-ink: #161616;
-  --note-ink-2: #4a4a4a;
-  --note-gold: #d10f1c;
-  --note-value-shadow: none;
+  --toast-surface: var(--offwhite);
+  --toast-ink: var(--black);
 
-  --shadow-note: 0 0 0 1px #e2e2e2, 0 14px 30px -18px rgba(0, 0, 0, 0.4);
-  --shadow-float: 0 12px 34px -12px rgba(0, 0, 0, 0.35);
-  --shadow-control: 0 1px 2px rgba(0, 0, 0, 0.22);
-  --backdrop: rgba(0, 0, 0, 0.5);
-}
+  /*
+   * Categorias nos gráficos: tons terrosos com o rótulo em preto por cima. A claridade varia de propósito:
+   * é o que mantém as oito cores separadas para quem tem daltonismo (protanopia, deuteranopia e tritanopia).
+   */
+  --series-1: #81884c;
+  --series-2: #c19886;
+  --series-3: #46bdc0;
+  --series-4: #edd597;
+  --series-5: #d8c2ff;
+  --series-6: #b3e3be;
+  --series-7: #5089b5;
+  --series-8: #b86d8a;
+  --series-other: var(--sage-300);
+  --series-ink: var(--black);
+  --flow-in: var(--olive-200);
+  --flow-out: var(--terracotta-300);
+  --rule-left: var(--olive-700);
+  --rule-left-ink: var(--offwhite);
 
-:root[data-theme='dark'] {
-  color-scheme: dark;
-  --paper: #000000;
-  --surface: #161616;
-  --surface-sunken: #222222;
-  --ink: #f5f5f5;
-  --ink-2: #c8c8c8;
-  --ink-3: #a8a8a8;
-  --line: #2b2b2b;
-  --line-strong: #565656;
-  --accent: #ff4d4d;
-  --accent-ink: #000000;
-  --accent-wash: #3a1214;
-  --focus: #ff7a7a;
-  --income-text: #6fd8a0;
-  --danger: #ff7a7a;
-  --danger-wash: #431518;
-  --status-good: #7be096;
-  --status-good-wash: #173f2a;
-  --status-warning: #f4c85c;
-  --status-warning-wash: #443413;
-  --status-critical: #ff8f8f;
-  --status-critical-wash: #431518;
-  --meter-good: #2fb457;
-  --meter-warning: #fab219;
-  --meter-critical: #e25a58;
-  --meter-goal: #f5f5f5;
-  --meter-track: #2b2b2b;
-  --series-1: #3987e5;
-  --series-2: #d95926;
-  --series-3: #199e70;
-  --series-4: #c98500;
-  --series-5: #d55181;
-  --series-6: #008300;
-  --series-7: #9085e9;
-  --series-8: #e66767;
-  --series-other: #808080;
-  --rule-left: #2b2b2b;
-  --rule-left-ink: #e6e6e6;
-  --axis-grid: #222222;
-  --axis-base: #565656;
-  --axis-text: #a8a8a8;
-  --note-paper: #161616;
-  --note-paper-2: #0c0c0c;
-  --note-line: rgba(255, 77, 77, 0.2);
-  --note-rosette: rgba(255, 77, 77, 0.6);
-  --note-ink: #ffffff;
-  --note-ink-2: #c8c8c8;
-  --note-gold: #ff4d4d;
+  --axis-grid: rgba(154, 156, 140, 0.16);
+  --axis-base: var(--sage-400);
+  --axis-text: var(--sage-300);
+
+  /* A cédula é verde-oliva; só fica terracota quando o mês fecha faltando. */
+  --note-paper: var(--olive-800);
+  --note-paper-2: var(--olive-900);
+  --note-line: rgba(154, 156, 140, 0.22);
+  --note-rosette: rgba(197, 204, 171, 0.5);
+  --note-ink: var(--offwhite);
+  --note-ink-2: var(--sage-200);
+  --note-gold: var(--olive-200);
   --note-value-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
-  --shadow-note: 0 0 0 1px #2b2b2b, 0 14px 30px -18px rgba(0, 0, 0, 0.9);
+  --note-short-paper: var(--terracotta-700);
+  --note-short-paper-2: var(--terracotta-900);
+  --note-short-line: rgba(232, 233, 225, 0.18);
+  --note-short-rosette: rgba(232, 233, 225, 0.5);
+  --note-short-ink: var(--offwhite);
+  --note-short-ink-2: #ebcfc2;
+  --note-short-gold: var(--offwhite);
+  --note-short-value-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+
+  --shadow-note: 0 0 0 1px var(--line), 0 14px 30px -18px rgba(0, 0, 0, 0.9);
   --shadow-float: 0 12px 34px -12px rgba(0, 0, 0, 0.8);
   --shadow-control: 0 1px 2px rgba(0, 0, 0, 0.6);
   --backdrop: rgba(0, 0, 0, 0.7);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root:where(:not([data-theme='light'])) {
-    color-scheme: dark;
-    --paper: #000000;
-    --surface: #161616;
-    --surface-sunken: #222222;
-    --ink: #f5f5f5;
-    --ink-2: #c8c8c8;
-    --ink-3: #a8a8a8;
-    --line: #2b2b2b;
-    --line-strong: #565656;
-    --accent: #ff4d4d;
-    --accent-ink: #000000;
-    --accent-wash: #3a1214;
-    --focus: #ff7a7a;
-    --income-text: #6fd8a0;
-    --danger: #ff7a7a;
-    --danger-wash: #431518;
-    --status-good: #7be096;
-    --status-good-wash: #173f2a;
-    --status-warning: #f4c85c;
-    --status-warning-wash: #443413;
-    --status-critical: #ff8f8f;
-    --status-critical-wash: #431518;
-    --meter-good: #2fb457;
-    --meter-warning: #fab219;
-    --meter-critical: #e25a58;
-    --meter-goal: #f5f5f5;
-    --meter-track: #2b2b2b;
-    --series-1: #3987e5;
-    --series-2: #d95926;
-    --series-3: #199e70;
-    --series-4: #c98500;
-    --series-5: #d55181;
-    --series-6: #008300;
-    --series-7: #9085e9;
-    --series-8: #e66767;
-    --series-other: #808080;
-    --rule-left: #2b2b2b;
-    --rule-left-ink: #e6e6e6;
-    --axis-grid: #222222;
-    --axis-base: #565656;
-    --axis-text: #a8a8a8;
-    --note-paper: #161616;
-    --note-paper-2: #0c0c0c;
-    --note-line: rgba(255, 77, 77, 0.2);
-    --note-rosette: rgba(255, 77, 77, 0.6);
-    --note-ink: #ffffff;
-    --note-ink-2: #c8c8c8;
-    --note-gold: #ff4d4d;
-    --note-value-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
-    --shadow-note: 0 0 0 1px #2b2b2b, 0 14px 30px -18px rgba(0, 0, 0, 0.9);
-    --shadow-float: 0 12px 34px -12px rgba(0, 0, 0, 0.8);
-    --shadow-control: 0 1px 2px rgba(0, 0, 0, 0.6);
-    --backdrop: rgba(0, 0, 0, 0.7);
-  }
+/* Tema claro, opcional: a mesma paleta de cabeça para baixo. */
+:root[data-theme='light'] {
+  color-scheme: light;
+
+  --paper: #f3f4ee;
+  --surface-solid: #ffffff;
+  --surface-sunken: var(--offwhite);
+  --field: #ffffff;
+  --control: #ffffff;
+  --control-hover: var(--offwhite);
+  --hover: rgba(48, 50, 42, 0.06);
+  --ink: var(--olive-900);
+  --ink-2: var(--olive-700);
+  --ink-3: var(--olive-500);
+  --line: rgba(92, 97, 80, 0.24);
+  --line-strong: var(--sage-400);
+
+  --accent-ink: #ffffff;
+  --accent-text: var(--olive-600);
+  --accent-wash: #dde0d2;
+  --focus: var(--olive-500);
+
+  --income-text: #47552a;
+  --expense-text: #8f4526;
+  --danger: #8f4526;
+  --danger-fill: #8f4526;
+  --danger-ink: #ffffff;
+  --danger-wash: #f1ddd3;
+
+  --status-good: #47552a;
+  --status-good-wash: #dfe5cc;
+  --status-warning: #6b5310;
+  --status-warning-wash: #f0e6c4;
+  --status-critical: #8f4526;
+  --status-critical-wash: #f1ddd3;
+  --meter-good: #5f6f2e;
+  --meter-warning: #8a6a12;
+  --meter-critical: #a8502e;
+  --meter-goal: var(--olive-800);
+  --meter-track: #dcded3;
+
+  --toast-surface: var(--olive-800);
+  --toast-ink: var(--offwhite);
+
+  --series-1: #3e4500;
+  --series-2: #5d3629;
+  --series-3: #068281;
+  --series-4: #916d33;
+  --series-5: #8062a0;
+  --series-6: #667b58;
+  --series-7: #0e426f;
+  --series-8: #7e2f51;
+  --series-other: #6f7264;
+  --series-ink: #ffffff;
+  --flow-in: #3e4500;
+  --flow-out: #b5613c;
+  --rule-left: #dcded3;
+  --rule-left-ink: var(--olive-900);
+
+  --axis-grid: rgba(92, 97, 80, 0.16);
+  --axis-base: var(--sage-400);
+  --axis-text: var(--olive-500);
+
+  --note-paper: #ffffff;
+  --note-paper-2: #eef0e6;
+  --note-line: rgba(92, 97, 80, 0.2);
+  --note-rosette: rgba(92, 97, 80, 0.55);
+  --note-ink: var(--olive-900);
+  --note-ink-2: var(--olive-700);
+  --note-gold: var(--olive-500);
+  --note-value-shadow: none;
+
+  --shadow-note: 0 0 0 1px var(--line), 0 14px 30px -18px rgba(48, 50, 42, 0.45);
+  --shadow-float: 0 12px 34px -12px rgba(48, 50, 42, 0.4);
+  --shadow-control: 0 1px 2px rgba(48, 50, 42, 0.25);
+  --backdrop: rgba(28, 29, 24, 0.5);
 }

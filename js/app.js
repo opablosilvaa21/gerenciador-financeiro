@@ -76,9 +76,8 @@
   }
 
   function applyTheme() {
-    const { theme } = store.state;
-    if (theme === 'light' || theme === 'dark') document.documentElement.dataset.theme = theme;
-    else delete document.documentElement.dataset.theme;
+    // O escuro é o padrão; o claro só entra quando a pessoa escolhe.
+    document.documentElement.dataset.theme = store.state.theme === 'light' ? 'light' : 'dark';
     barColor.content = getComputedStyle(document.documentElement).getPropertyValue('--paper').trim();
   }
 
@@ -195,7 +194,7 @@
         'div',
         { class: 'welcome-text' },
         el('h1', { id: 'page-title', tabIndex: -1 }, 'Quanto sobra no fim do mês?'),
-        el('p', {}, 'Registre o que entra e o que sai. O Sobra imprime o resultado do mês em uma cédula, e ela fica vermelha se faltar. Tudo fica só neste navegador.'),
+        el('p', {}, 'Registre o que entra e o que sai. O Sobra imprime o resultado do mês em uma cédula, e ela muda de cor se faltar. Tudo fica só neste navegador.'),
         el(
           'form',
           {
@@ -317,7 +316,6 @@
     }
   });
 
-  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => applyTheme());
   FM.pwa.onChange(() => render({ keepFocus: true }));
 
   ctx.params = parseHash().params;

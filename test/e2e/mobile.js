@@ -168,12 +168,14 @@ const box = (selector) => page.$eval(selector, (n) => {
     assert.equal(hit, true);
   });
   await step('a escolha de tema colore a barra do sistema', async () => {
+    // O escuro é o padrão, mesmo com o sistema em claro.
+    assert.equal(await page.$eval('meta[name="theme-color"]', (n) => n.content), '#000000');
+    await page.evaluate(() => FM.app.store.setTheme('light'));
+    await delay(40);
+    assert.equal(await page.$eval('meta[name="theme-color"]', (n) => n.content), '#f3f4ee');
     await page.evaluate(() => FM.app.store.setTheme('dark'));
     await delay(40);
     assert.equal(await page.$eval('meta[name="theme-color"]', (n) => n.content), '#000000');
-    await page.evaluate(() => FM.app.store.setTheme('auto'));
-    await delay(40);
-    assert.equal(await page.$eval('meta[name="theme-color"]', (n) => n.content), '#ffffff');
   });
   await step('os atalhos de teclado saem dos Ajustes', async () => {
     await go('ajustes');
