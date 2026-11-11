@@ -1,4 +1,4 @@
-# Sobra
+# Sobra Finance
 
 Gerenciador financeiro pessoal que roda direto no navegador. O resultado de cada mês aparece em uma cédula
 com o valor que sobra; se o mês fechar faltando, a cédula muda de verde floresta para ferrugem.

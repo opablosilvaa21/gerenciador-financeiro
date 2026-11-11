@@ -1,7 +1,7 @@
 {
   "id": "./",
-  "name": "Sobra",
-  "short_name": "Sobra",
+  "name": "Sobra Finance",
+  "short_name": "Sobra Finance",
   "description": "Gerenciador financeiro pessoal. Mostra quanto sobra no fim do mês, e seus dados ficam só no seu aparelho.",
   "lang": "pt-BR",
   "dir": "ltr",

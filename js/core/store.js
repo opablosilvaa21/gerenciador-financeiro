@@ -56,7 +56,7 @@
   /** Confere um arquivo importado. Devolve a lista de problemas; vazia quer dizer que dá para usar. */
   function validateState(data) {
     const problems = [];
-    if (!data || typeof data !== 'object' || Array.isArray(data)) return ['O arquivo não tem o formato do Sobra.'];
+    if (!data || typeof data !== 'object' || Array.isArray(data)) return ['O arquivo não tem o formato do Sobra Finance.'];
     for (const key of ['accounts', 'categories', 'transactions', 'recurring', 'goals']) {
       if (!Array.isArray(data[key])) problems.push(`Falta a lista "${key}".`);
     }

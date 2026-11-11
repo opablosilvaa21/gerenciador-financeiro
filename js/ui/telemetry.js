@@ -1,5 +1,5 @@
 /**
- * Contagem de instalações: quantos aparelhos usam o Sobra e quais (sistema, navegador, modelo, tela).
+ * Contagem de instalações: quantos aparelhos usam o Sobra Finance e quais (sistema, navegador, modelo, tela).
  *
  * O que sai do aparelho: um identificador aleatório criado aqui e os dados técnicos acima. Nada mais.
  * Nenhum lançamento, saldo, nome ou e-mail é lido por este arquivo.

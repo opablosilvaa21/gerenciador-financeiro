@@ -185,6 +185,25 @@ a {
   box-shadow: 0 6px 16px -6px var(--glow);
 }
 
+.brand-sub {
+  font-weight: 500;
+  font-style: italic;
+  color: var(--accent-text);
+}
+
+/* Na lateral não cabe numa linha: "Finance" desce, alinhado embaixo de "Sobra". */
+.side .brand {
+  flex-wrap: wrap;
+  row-gap: 0;
+}
+
+.side .brand-sub {
+  flex-basis: 100%;
+  margin-top: -2px;
+  padding-left: 33px;
+  font-size: 17px;
+}
+
 .brand-top {
   display: none;
 }

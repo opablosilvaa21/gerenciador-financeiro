@@ -286,7 +286,7 @@
           dataset: { fk: 'nova-fixa' },
           onclick: () => openRecurringForm(ctx),
         }, icon('plus'), 'Nova conta fixa'),
-        intro: 'Todo mês o Sobra cria o lançamento como pendente. Você só confirma quando pagar ou receber.',
+        intro: 'Todo mês o Sobra Finance cria o lançamento como pendente. Você só confirma quando pagar ou receber.',
       }),
       state.recurring.length > 0 && el(
         'dl',
@@ -340,7 +340,7 @@
 
     const nameField = field('Nome da meta', nameInput);
     const targetField = field('Quanto quer juntar', targetInput, { class: 'field-money' });
-    const deadlineField = field('Até quando', deadlineInput, { hint: 'Opcional. Com prazo, o Sobra calcula quanto guardar por mês.' });
+    const deadlineField = field('Até quando', deadlineInput, { hint: 'Opcional. Com prazo, o Sobra Finance calcula quanto guardar por mês.' });
 
     const submit = () => {
       let ok = true;

@@ -168,7 +168,7 @@
         'div',
         { class: 'band-head' },
         el('h2', {}, 'Área restrita'),
-        el('p', { class: 'chart-sub' }, 'Entre com a conta de administrador para ver quantos aparelhos usam o Sobra. Seus lançamentos não têm relação com esta conta e continuam só neste aparelho.'),
+        el('p', { class: 'chart-sub' }, 'Entre com a conta de administrador para ver quantos aparelhos usam o Sobra Finance. Seus lançamentos não têm relação com esta conta e continuam só neste aparelho.'),
       ),
       el(
         'form',
@@ -248,7 +248,7 @@
           el('button', { class: 'button', type: 'button', disabled: state.status === 'loading', dataset: { fk: 'admin-atualizar' }, onclick: () => load({ force: true }) }, icon('repeat'), 'Atualizar'),
           el('button', { class: 'button', type: 'button', dataset: { fk: 'admin-sair' }, onclick: signOut }, 'Sair'),
         ],
-        intro: 'Quantos aparelhos usam o Sobra e quais. Só dados técnicos anônimos: nenhum lançamento, saldo ou dado pessoal chega aqui.',
+        intro: 'Quantos aparelhos usam o Sobra Finance e quais. Só dados técnicos anônimos: nenhum lançamento, saldo ou dado pessoal chega aqui.',
       }),
       body(),
     );
