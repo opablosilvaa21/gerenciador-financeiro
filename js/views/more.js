@@ -406,7 +406,7 @@
           'div',
           { class: 'band-head' },
           el('h2', {}, 'Seus dados'),
-          el('p', { class: 'chart-sub' }, 'Seus lançamentos, saldos e metas ficam só neste navegador, neste aparelho, e nunca são enviados para a internet. Limpar os dados do navegador apaga o Sobra, então baixe um backup de vez em quando.'),
+          el('p', { class: 'chart-sub' }, 'Seus lançamentos, saldos e metas ficam só neste navegador, neste aparelho, e nunca são enviados para a internet. Limpar os dados do navegador apaga o Sobra Finance, então baixe um backup de vez em quando.'),
         ),
         el(
           'div',
@@ -430,7 +430,7 @@
           'div',
           { class: 'band-head' },
           el('h2', {}, 'Privacidade'),
-          el('p', { class: 'chart-sub' }, 'Para saber quantos aparelhos usam o app, o Sobra pode enviar, uma vez por dia, dados técnicos anônimos: sistema, navegador, modelo, tamanho da tela, versão do app e se ele está instalado. Nenhum lançamento, saldo ou dado pessoal é enviado.'),
+          el('p', { class: 'chart-sub' }, 'Para saber quantos aparelhos usam o app, o Sobra Finance pode enviar, uma vez por dia, dados técnicos anônimos: sistema, navegador, modelo, tamanho da tela, versão do app e se ele está instalado. Nenhum lançamento, saldo ou dado pessoal é enviado.'),
         ),
         segmented('contagem', 'Contagem anônima de aparelhos', [
           { value: 'aceito', label: 'Participar' },
@@ -448,9 +448,9 @@
           'div',
           { class: 'band-head' },
           el('h2', {}, 'Instalar como aplicativo'),
-          el('p', { class: 'chart-sub' }, 'O Sobra ganha um ícone na tela inicial, abre em tela cheia e funciona sem internet. Os dados do aplicativo podem ficar separados dos deste navegador: se já tiver lançamentos aqui, baixe um backup e restaure depois de instalar.'),
+          el('p', { class: 'chart-sub' }, 'O Sobra Finance ganha um ícone na tela inicial, abre em tela cheia e funciona sem internet. Os dados do aplicativo podem ficar separados dos deste navegador: se já tiver lançamentos aqui, baixe um backup e restaure depois de instalar.'),
         ),
-        el('div', { class: 'action-list' }, el('button', { class: 'button', type: 'button', onclick: () => FM.pwa.install() }, icon('download'), 'Instalar o Sobra')),
+        el('div', { class: 'action-list' }, el('button', { class: 'button', type: 'button', onclick: () => FM.pwa.install() }, icon('download'), 'Instalar o Sobra Finance')),
       ),
       el(
         'section',
@@ -489,7 +489,19 @@
           el('button', { class: 'button button-ghost-danger', type: 'button', onclick: eraseAll }, icon('trash'), 'Apagar todos os dados'),
         ),
       ),
+      el('p', { class: 'field-hint app-version' }, versionText()),
     );
+  }
+
+  /** "Versão 1.2.0, publicada em 11/11/2026 15:30": dá para conferir em qualquer aparelho se a atualização chegou. */
+  function versionText() {
+    const { appVersion, build } = FM.config;
+    const stamp = /^(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})-/.exec(build || '');
+    if (!stamp) return `Versão ${appVersion} (cópia local)`;
+    const [, year, month, day, hour, minute] = stamp;
+    const when = new Date(Date.UTC(+year, +month - 1, +day, +hour, +minute));
+    const label = when.toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+    return `Versão ${appVersion}, publicada em ${label}`;
   }
 
   FM.views = FM.views || {};

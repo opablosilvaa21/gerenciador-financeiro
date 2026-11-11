@@ -147,11 +147,11 @@
 
   function privacyDetails() {
     FM.dom.openDialog({
-      title: 'O que o Sobra envia',
+      title: 'O que o Sobra Finance envia',
       body: el(
         'div',
         { class: 'form' },
-        el('p', {}, 'Para saber quantos aparelhos usam o app, o Sobra envia uma vez por dia:'),
+        el('p', {}, 'Para saber quantos aparelhos usam o app, o Sobra Finance envia uma vez por dia:'),
         el(
           'ul',
           { class: 'plain-list' },
@@ -165,11 +165,19 @@
 
   function renderBanners() {
     banners.replaceChildren();
+    if (FM.pwa.updateReady()) {
+      banners.append(el(
+        'div',
+        { class: 'banner banner-update', role: 'status' },
+        el('span', {}, 'Uma versão nova do Sobra Finance está pronta.'),
+        el('button', { class: 'button button-small button-primary', type: 'button', onclick: () => FM.pwa.applyNow() }, 'Atualizar agora'),
+      ));
+    }
     if (FM.telemetry.needsNotice()) {
       banners.append(el(
         'div',
         { class: 'banner banner-privacy', role: 'region', 'aria-label': 'Aviso de privacidade' },
-        el('span', {}, 'O Sobra conta quantos aparelhos usam o app. Para isso envia dados técnicos anônimos do aparelho (sistema, navegador e modelo). Nenhum dado financeiro ou pessoal sai daqui.'),
+        el('span', {}, 'O Sobra Finance conta quantos aparelhos usam o app. Para isso envia dados técnicos anônimos do aparelho (sistema, navegador e modelo). Nenhum dado financeiro ou pessoal sai daqui.'),
         el('button', { class: 'button button-small button-primary', type: 'button', onclick: () => FM.telemetry.accept() }, 'Tudo bem'),
         el('button', { class: 'button button-small', type: 'button', onclick: () => FM.telemetry.refuse() }, 'Recusar'),
         el('button', { class: 'link-button', type: 'button', onclick: privacyDetails }, 'O que é enviado'),
@@ -179,7 +187,7 @@
       banners.append(el(
         'div',
         { class: 'banner' },
-        el('span', {}, 'Instale o Sobra na tela inicial para abrir como aplicativo, até sem internet.'),
+        el('span', {}, 'Instale o Sobra Finance na tela inicial para abrir como aplicativo, até sem internet.'),
         el('button', { class: 'link-button', type: 'button', onclick: () => FM.pwa.install() }, 'Instalar'),
         el('button', { class: 'link-button', type: 'button', onclick: () => FM.pwa.dismissOffer() }, 'Agora não'),
       ));
@@ -224,7 +232,7 @@
         'div',
         { class: 'welcome-text' },
         el('h1', { id: 'page-title', tabIndex: -1 }, 'Quanto sobra no fim do mês?'),
-        el('p', {}, 'Registre o que entra e o que sai. O Sobra imprime o resultado do mês em uma cédula, e ela muda de cor se faltar. Seus lançamentos ficam só neste navegador.'),
+        el('p', {}, 'Registre o que entra e o que sai. O Sobra Finance imprime o resultado do mês em uma cédula, e ela muda de cor se faltar. Seus lançamentos ficam só neste navegador.'),
         el(
           'form',
           {
@@ -269,7 +277,7 @@
     booted = true;
     applyTheme();
     tip.hide();
-    // O painel de instalações não depende dos dados do app: abre mesmo em um aparelho que nunca usou o Sobra.
+    // O painel de instalações não depende dos dados do app: abre mesmo em um aparelho que nunca usou o Sobra Finance.
     const onboarding = !store.state.onboarded && !currentRoute().hidden;
     document.body.classList.toggle('is-onboarding', onboarding);
     renderBanners();
@@ -300,7 +308,7 @@
     main.replaceChildren(view);
     // A tela só "entra" ao abrir ou trocar de rota; salvar um dado redesenha sem animar de novo.
     if (firstRender || !keepFocus) FM.motion.enter(view);
-    document.title = `${route.label} | Sobra`;
+    document.title = `${route.label} | Sobra Finance`;
 
     if (keepFocus) {
       window.scrollTo(0, scroll);

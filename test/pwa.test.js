@@ -36,6 +36,31 @@ test('os ícones e as telas do manifesto existem no tamanho declarado', () => {
   }
 });
 
+test('toda publicação muda o sw.js, e é isso que faz os aparelhos se atualizarem', () => {
+  const has = (text, piece, message) => assert.ok(text.includes(piece), message || `falta: ${piece}`);
+  const sw = read('sw.js');
+  has(sw, "const BUILD = '__BUILD__';");
+  has(sw, 'const CACHE = `sobra-${BUILD}`;');
+  has(read('js/config.js'), "build: '__BUILD__'");
+  const workflow = read('.github/workflows/publicar.yml');
+  has(workflow, 'sed -i "s/__BUILD__/${BUILD}/g" sw.js js/config.js');
+  has(workflow, 'run: npm test');
+  has(workflow, 'needs: testes', 'só publica se os testes passarem');
+});
+
+test('a publicação leva tudo o que a página carrega', () => {
+  const line = read('.github/workflows/publicar.yml').split('\n').find((l) => l.trim().startsWith('cp -r '));
+  const copy = line.trim().replace('cp -r ', '').replace(' _site/', '').split(' ');
+  for (const file of swFiles().filter((f) => f !== './')) {
+    assert.ok(copy.some((entry) => file === entry || file.startsWith(`${entry}/`)), `${file} não seria publicado`);
+  }
+});
+
+test('a versão do app é a mesma no package.json e em js/config.js', () => {
+  const { version } = JSON.parse(read('package.json'));
+  assert.ok(read('js/config.js').includes(`appVersion: '${version}'`), `js/config.js não está na versão ${version}`);
+});
+
 test('os endereços do manifesto são relativos, para funcionar dentro da pasta do GitHub Pages', () => {
   const manifest = JSON.parse(read('manifest.webmanifest'));
   for (const url of [manifest.start_url, manifest.scope, ...manifest.shortcuts.map((s) => s.url)]) {

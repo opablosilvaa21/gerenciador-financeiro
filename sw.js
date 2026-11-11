@@ -1,9 +1,17 @@
 /**
- * Deixa o Sobra abrir sem internet. Com internet, busca sempre a versão nova e guarda uma cópia;
- * sem internet, ou com a rede lenta demais, usa a última cópia.
+ * Deixa o Sobra abrir sem internet e faz toda publicação chegar a todos os aparelhos.
+ *
+ * Com internet, busca sempre a versão nova (revalidando com o servidor, sem confiar no cache do navegador)
+ * e guarda uma cópia; sem internet, ou com a rede lenta demais, usa a última cópia.
+ *
+ * BUILD é trocado pela publicação automática (.github/workflows/publicar.yml) a cada envio para a main.
+ * Como este arquivo muda a cada publicação, o navegador percebe que existe uma versão nova, instala esta,
+ * e a página (js/ui/pwa.js) se recarrega para usá-la.
+ *
  * Os dados da pessoa não passam por aqui: ficam no localStorage.
  */
-const CACHE = 'sobra-v4';
+const BUILD = '__BUILD__';
+const CACHE = `sobra-${BUILD}`;
 const TIMEOUT_MS = 3000;
 
 const FILES = [
@@ -42,7 +50,12 @@ const FILES = [
 ];
 
 self.addEventListener('install', (event) => {
-  event.waitUntil(caches.open(CACHE).then((cache) => cache.addAll(FILES)).then(() => self.skipWaiting()));
+  // cache: 'reload' busca direto no servidor: a cópia nova nunca sai do cache antigo do navegador.
+  event.waitUntil(
+    caches.open(CACHE)
+      .then((cache) => cache.addAll(FILES.map((file) => new Request(file, { cache: 'reload' }))))
+      .then(() => self.skipWaiting()),
+  );
 });
 
 self.addEventListener('activate', (event) => {
@@ -58,7 +71,8 @@ self.addEventListener('fetch', (event) => {
   const { request } = event;
   if (request.method !== 'GET' || new URL(request.url).origin !== self.location.origin) return;
 
-  const network = fetch(request).then(async (response) => {
+  // no-cache: pergunta ao servidor se mudou (resposta curta quando não mudou), em vez de usar a cópia do navegador.
+  const network = fetch(request, { cache: 'no-cache' }).then(async (response) => {
     if (response.ok) {
       const copy = response.clone();
       await (await caches.open(CACHE)).put(request, copy);

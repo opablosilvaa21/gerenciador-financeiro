@@ -19,6 +19,8 @@ const delay = (ms) => new Promise((r) => setTimeout(r, ms));
 let page;
 let passed = 0;
 let newVersionMark = '';
+/** Faz o papel da publicação automática, que troca __BUILD__ no sw.js a cada envio para a main. */
+let swBuild = 'teste-1';
 const failures = [];
 const consoleProblems = [];
 let watchConsole = true;
@@ -32,6 +34,7 @@ const server = http.createServer((request, response) => {
   }
   let body = fs.readFileSync(file);
   if (file.endsWith('index.html') && newVersionMark) body = body.toString().replace('</head>', `<meta name="versao" content="${newVersionMark}"></head>`);
+  if (file.endsWith('sw.js')) body = body.toString().replace("'__BUILD__'", `'${swBuild}'`);
   response.writeHead(200, { 'Content-Type': TYPES[path.extname(file)] || 'application/octet-stream', 'Cache-Control': 'no-store' });
   response.end(body);
 });
@@ -312,6 +315,33 @@ const box = (selector) => page.$eval(selector, (n) => {
     await page.reload();
     await page.waitForSelector('.view-home');
     assert.equal(await page.evaluate(() => Boolean(navigator.serviceWorker.controller)), true);
+  });
+  /** Simula uma publicação nova e pede ao navegador para conferir, como o app faz ao voltar para a tela. */
+  const publishAndCheck = async (build) => {
+    swBuild = build;
+    await page.evaluate(() => { window.versaoAntiga = true; });
+    await page.evaluate(() => navigator.serviceWorker.getRegistration().then((r) => r.update()));
+  };
+  await step('uma publicação nova chega sozinha: a página se recarrega com ela', async () => {
+    await publishAndCheck('teste-2');
+    await page.waitForFunction(() => !window.versaoAntiga, { timeout: 20000 });
+    await page.waitForSelector('.view-home');
+    assert.ok((await page.evaluate(() => caches.keys())).includes('sobra-teste-2'));
+    assert.ok(!(await page.evaluate(() => caches.keys())).includes('sobra-teste-1'), 'a cópia antiga é apagada');
+  });
+  await step('no meio de um lançamento a atualização espera, avisa e entra quando o formulário fecha', async () => {
+    await (await page.$('#tabbar .tab-new')).tap();
+    await page.waitForSelector('dialog[open]');
+    await page.type('dialog[open] .input-money', '9,99');
+    await publishAndCheck('teste-3');
+    await page.waitForFunction(() => /versão nova/.test(document.querySelector('#banners').textContent), { timeout: 20000 });
+    await delay(1500);
+    assert.equal(await page.evaluate(() => window.versaoAntiga), true, 'recarregou com o formulário aberto');
+    assert.equal(await page.$eval('dialog[open] .input-money', (n) => n.value), '9,99');
+    await page.evaluate(() => document.querySelector('dialog[open] [aria-label="Fechar"]').click());
+    await page.waitForFunction(() => !window.versaoAntiga, { timeout: 20000 });
+    await page.waitForSelector('.view-home');
+    assert.ok((await page.evaluate(() => caches.keys())).includes('sobra-teste-3'));
   });
   await step('o Chrome considera o app instalável', async () => {
     const cdp = await page.createCDPSession();

@@ -12,7 +12,9 @@
   const FM = (root.FM = root.FM || {});
 
   FM.config = {
-    appVersion: '1.1.0',
+    appVersion: '1.2.0',
+    // Trocado pela publicação automática por data e commit (ex.: 202611111530-c04ea53). Fora dela, fica assim.
+    build: '__BUILD__',
     // Projeto "sobra-finance" (região São Paulo). Chave pública: só registra o aparelho e faz login.
     supabaseUrl: 'https://huidncxxzwpdduoholyg.supabase.co',
     supabaseKey: 'sb_publishable_wkzegfIBKCw6ikMTYkwhHg_f-Alf2or',
