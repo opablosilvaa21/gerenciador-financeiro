@@ -406,7 +406,7 @@
           'div',
           { class: 'band-head' },
           el('h2', {}, 'Seus dados'),
-          el('p', { class: 'chart-sub' }, 'Tudo fica só neste navegador, neste aparelho. Nada é enviado para a internet. Limpar os dados do navegador apaga o Sobra, então baixe um backup de vez em quando.'),
+          el('p', { class: 'chart-sub' }, 'Seus lançamentos, saldos e metas ficam só neste navegador, neste aparelho, e nunca são enviados para a internet. Limpar os dados do navegador apaga o Sobra, então baixe um backup de vez em quando.'),
         ),
         el(
           'div',
@@ -422,6 +422,24 @@
           el('button', { class: 'button', type: 'button', onclick: () => pickFile('.csv,text/csv', (text, name) => openStatementImport(ctx, text, name)) }, icon('upload'), 'Importar extrato em CSV'),
         ),
         el('p', { class: 'field-hint' }, 'O CSV precisa de colunas de data, descrição e valor. Valor negativo vira despesa e positivo vira receita. Linhas iguais às que já existem ficam de fora.'),
+      ),
+      FM.telemetry.enabled() && el(
+        'section',
+        { class: 'band card' },
+        el(
+          'div',
+          { class: 'band-head' },
+          el('h2', {}, 'Privacidade'),
+          el('p', { class: 'chart-sub' }, 'Para saber quantos aparelhos usam o app, o Sobra pode enviar, uma vez por dia, dados técnicos anônimos: sistema, navegador, modelo, tamanho da tela, versão do app e se ele está instalado. Nenhum lançamento, saldo ou dado pessoal é enviado.'),
+        ),
+        segmented('contagem', 'Contagem anônima de aparelhos', [
+          { value: 'aceito', label: 'Participar' },
+          { value: 'recusado', label: 'Não participar' },
+        ], FM.telemetry.consent() || '', (value) => {
+          FM.telemetry.setConsent(value === 'aceito');
+          toast(value === 'aceito' ? 'Este aparelho entra na contagem' : 'Este aparelho não envia mais nada');
+        }),
+        FM.telemetry.consent() === 'aceito' && FM.telemetry.deviceId() && el('p', { class: 'field-hint' }, `Identificador aleatório deste aparelho: ${FM.telemetry.deviceId().slice(0, 8)}. Ele não diz quem você é.`),
       ),
       FM.pwa.canOffer() && el(
         'section',

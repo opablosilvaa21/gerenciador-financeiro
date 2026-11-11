@@ -13,6 +13,8 @@
     { key: 'metas', label: 'Metas', view: 'goals', icon: 'target' },
     { key: 'relatorios', label: 'Relatórios', view: 'reports', icon: 'chart' },
     { key: 'ajustes', label: 'Ajustes', view: 'settings', icon: 'sliders' },
+    // Fora do menu: só chega aqui quem conhece o endereço, e os números só saem do banco com login de administrador.
+    { key: 'admin/instalacoes', label: 'Instalações', view: 'adminInstalls', icon: 'chart', hidden: true },
   ];
 
   let storage = null;
@@ -83,7 +85,7 @@
 
   function renderNav(route) {
     nav.replaceChildren(
-      ...ROUTES.map((r) =>
+      ...ROUTES.filter((r) => !r.hidden).map((r) =>
         el('a', { href: `#/${r.key}`, class: 'nav-link', 'aria-current': r.key === route.key ? 'page' : null }, FM.dom.icon(r.icon, 18), el('span', {}, r.label)),
       ),
     );
@@ -131,7 +133,7 @@
       body: el(
         'ul',
         { class: 'more-list' },
-        ROUTES.filter((r) => !r.tab).map((r) =>
+        ROUTES.filter((r) => !r.tab && !r.hidden).map((r) =>
           el('li', {}, el('a', {
             href: `#/${r.key}`,
             class: 'more-link',
@@ -143,8 +145,36 @@
     });
   }
 
+  function privacyDetails() {
+    FM.dom.openDialog({
+      title: 'O que o Sobra envia',
+      body: el(
+        'div',
+        { class: 'form' },
+        el('p', {}, 'Para saber quantos aparelhos usam o app, o Sobra envia uma vez por dia:'),
+        el(
+          'ul',
+          { class: 'plain-list' },
+          ['um identificador aleatório criado neste aparelho', 'sistema e versão (por exemplo, Android 15)', 'navegador e, quando o aparelho informa, o modelo', 'tamanho da tela, versão do app e se ele está instalado'].map((item) => el('li', {}, item)),
+        ),
+        el('p', {}, 'Nunca são enviados lançamentos, saldos, categorias, nome, e-mail, localização nem endereço IP. Seus dados financeiros continuam só neste aparelho.'),
+        el('p', { class: 'field-hint' }, 'Você pode mudar essa escolha quando quiser, em Ajustes.'),
+      ),
+    });
+  }
+
   function renderBanners() {
     banners.replaceChildren();
+    if (FM.telemetry.needsNotice()) {
+      banners.append(el(
+        'div',
+        { class: 'banner banner-privacy', role: 'region', 'aria-label': 'Aviso de privacidade' },
+        el('span', {}, 'O Sobra conta quantos aparelhos usam o app. Para isso envia dados técnicos anônimos do aparelho (sistema, navegador e modelo). Nenhum dado financeiro ou pessoal sai daqui.'),
+        el('button', { class: 'button button-small button-primary', type: 'button', onclick: () => FM.telemetry.accept() }, 'Tudo bem'),
+        el('button', { class: 'button button-small', type: 'button', onclick: () => FM.telemetry.refuse() }, 'Recusar'),
+        el('button', { class: 'link-button', type: 'button', onclick: privacyDetails }, 'O que é enviado'),
+      ));
+    }
     if (store.state.onboarded && FM.pwa.showOffer()) {
       banners.append(el(
         'div',
@@ -194,7 +224,7 @@
         'div',
         { class: 'welcome-text' },
         el('h1', { id: 'page-title', tabIndex: -1 }, 'Quanto sobra no fim do mês?'),
-        el('p', {}, 'Registre o que entra e o que sai. O Sobra imprime o resultado do mês em uma cédula, e ela muda de cor se faltar. Tudo fica só neste navegador.'),
+        el('p', {}, 'Registre o que entra e o que sai. O Sobra imprime o resultado do mês em uma cédula, e ela muda de cor se faltar. Seus lançamentos ficam só neste navegador.'),
         el(
           'form',
           {
@@ -239,10 +269,12 @@
     booted = true;
     applyTheme();
     tip.hide();
-    document.body.classList.toggle('is-onboarding', !store.state.onboarded);
+    // O painel de instalações não depende dos dados do app: abre mesmo em um aparelho que nunca usou o Sobra.
+    const onboarding = !store.state.onboarded && !currentRoute().hidden;
+    document.body.classList.toggle('is-onboarding', onboarding);
     renderBanners();
 
-    if (!store.state.onboarded) {
+    if (onboarding) {
       wasOnboarding = true;
       nav.replaceChildren();
       renderOnboarding();
@@ -251,7 +283,7 @@
     }
 
     // Quem acabou de começar (ou recomeçar) vai para o Início, de onde quer que estivesse.
-    if (wasOnboarding) {
+    if (wasOnboarding && store.state.onboarded) {
       wasOnboarding = false;
       history.replaceState(null, '', '#/inicio');
       ctx.month = dates.monthOf(store.today());
@@ -297,7 +329,7 @@
   document.addEventListener('keydown', (event) => {
     const target = event.target;
     const typing = target.matches?.('input, select, textarea') || target.isContentEditable;
-    if (document.querySelector('dialog[open]') || !store.state.onboarded) return;
+    if (document.querySelector('dialog[open]') || !store.state.onboarded || currentRoute().hidden) return;
 
     if ((event.ctrlKey || event.metaKey) && !event.shiftKey && event.key.toLowerCase() === 'z' && !typing) {
       event.preventDefault();
@@ -323,6 +355,7 @@
   });
 
   FM.pwa.onChange(() => render({ keepFocus: true }));
+  FM.telemetry.onChange(() => render({ keepFocus: true }));
 
   ctx.params = parseHash().params;
   render({ keepFocus: true });

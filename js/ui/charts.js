@@ -398,5 +398,50 @@
     };
   }
 
-  FM.charts = { frame, monthRule, cashflowChart, balanceChart, rankingChart, legendList, seriesColor };
+  /** Contagem por dia em colunas. data: [{ label, short, value }]. Os valores são inteiros. */
+  function countChart(data, { height = 220, ariaLabel, one, many }) {
+    const unit = (value) => (value === 1 ? one : many);
+    const chart = () =>
+      responsive(el('div', { class: 'chart-canvas', style: { height: `${height}px` } }), (width) => {
+        const pad = { top: 10, right: 4, bottom: 26, left: 34 };
+        const plotW = width - pad.left - pad.right;
+        const plotH = height - pad.top - pad.bottom;
+        const max = Math.max(...data.map((d) => d.value), 1);
+        const step = Math.max(1, niceScale(max).step);
+        const top = Math.ceil(max / step) * step;
+        const y = (value) => pad.top + plotH - (value / top) * plotH;
+        const band = plotW / data.length;
+        const barW = Math.min(22, Math.max(3, band - 4));
+        const root = svg('svg', { width, height, role: 'group', 'aria-label': ariaLabel, class: 'chart-svg' });
+
+        for (let value = 0; value <= top; value += step) {
+          root.append(svg('line', { x1: pad.left, x2: width - pad.right, y1: y(value), y2: y(value), class: value === 0 ? 'axis-base' : 'axis-grid' }));
+          root.append(svg('text', { x: pad.left - 8, y: y(value) + 4, 'text-anchor': 'end', class: 'axis-text' }, String(value)));
+        }
+
+        const labelEvery = Math.max(1, Math.ceil(46 / band));
+        data.forEach((d, i) => {
+          const center = pad.left + band * i + band / 2;
+          const group = svg('g', { class: 'bar-group', tabindex: 0, role: 'img', 'aria-label': `${d.label}: ${d.value} ${unit(d.value)}` });
+          group.append(svg('rect', { x: center - band / 2, y: pad.top, width: band, height: plotH + pad.bottom, class: 'bar-hit' }));
+          if (d.value > 0) {
+            group.append(svg('path', { d: columnPath(center - barW / 2, y(d.value), barW, y(0) - y(d.value), 3), class: 'bar bar-accent', style: { '--d': String(i) } }));
+          }
+          if ((data.length - 1 - i) % labelEvery === 0) {
+            group.append(svg('text', { x: center, y: height - 8, 'text-anchor': 'middle', class: 'axis-text' }, d.short));
+          }
+          withTip(group, () => ({ title: d.label, rows: [{ value: String(d.value), label: unit(d.value) }] }));
+          root.append(group);
+        });
+        return root;
+      });
+
+    return {
+      chart,
+      columns: ['Dia', 'Aparelhos novos'],
+      rows: data.map((d) => [d.label, String(d.value)]),
+    };
+  }
+
+  FM.charts = { frame, monthRule, cashflowChart, balanceChart, rankingChart, countChart, legendList, seriesColor };
 })(globalThis);

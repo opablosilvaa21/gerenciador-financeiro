@@ -3,7 +3,7 @@
  * sem internet, ou com a rede lenta demais, usa a última cópia.
  * Os dados da pessoa não passam por aqui: ficam no localStorage.
  */
-const CACHE = 'sobra-v2';
+const CACHE = 'sobra-v3';
 const TIMEOUT_MS = 3000;
 
 const FILES = [
@@ -16,11 +16,13 @@ const FILES = [
   'assets/icone-192.png',
   'assets/fonts/space-grotesk.woff2',
   'assets/fonts/jetbrains-mono.woff2',
+  'js/config.js',
   'js/core/money.js',
   'js/core/dates.js',
   'js/core/store.js',
   'js/core/queries.js',
   'js/core/demo.js',
+  'js/core/device.js',
   'js/ui/dom.js',
   'js/ui/motion.js',
   'js/ui/charts.js',
@@ -28,10 +30,13 @@ const FILES = [
   'js/ui/common.js',
   'js/ui/tx-form.js',
   'js/ui/pwa.js',
+  'js/ui/backend.js',
+  'js/ui/telemetry.js',
   'js/views/home.js',
   'js/views/transactions.js',
   'js/views/planning.js',
   'js/views/more.js',
+  'js/views/admin.js',
   'js/app.js',
 ];
 

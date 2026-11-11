@@ -16,7 +16,7 @@ próprio e sem precisar de internet.
 
 No computador, também dá para dar dois cliques em `index.html`; nesse caso não há instalação nem modo offline.
 
-Os dados ficam só no aparelho, e nada é enviado para fora. O computador e o celular não se falam, e o app instalado
+Os dados financeiros ficam só no aparelho e nunca são enviados para fora. O computador e o celular não se falam, e o app instalado
 pode ter dados separados dos do navegador. Limpar os dados do navegador apaga o Sobra, então baixe um backup de vez
 em quando em **Ajustes**. Para levar os dados a outro lugar, restaure esse backup lá.
 
@@ -32,7 +32,8 @@ em quando em **Ajustes**. Para levar os dados a outro lugar, restaure esse backu
 - **Contas fixas:** o lançamento do mês é criado sozinho como pendente; dá para pausar e retomar.
 - **Metas:** quanto falta e quanto guardar por mês para chegar no prazo.
 - **Relatórios:** comparação por período e por categoria; todo gráfico também tem visão em tabela.
-- **Ajustes:** tema escuro (padrão) ou claro, categorias, backup, importação de extrato em CSV.
+- **Ajustes:** tema escuro (padrão) ou claro, categorias, backup, importação de extrato em CSV e a escolha de
+  participar ou não da contagem anônima de aparelhos.
 
 Quase toda alteração pode ser desfeita, pelo aviso na tela ou com `Ctrl + Z`.
 
@@ -48,9 +49,11 @@ Quase toda alteração pode ser desfeita, pelo aviso na tela ou com `Ctrl + Z`.
 HTML, CSS e JavaScript puros, sem framework e sem etapa de build.
 
 ```
-js/core    regras sem interface: dinheiro, datas, dados e cálculos
+js/config.js  versão do app e endereço público do Supabase (contagem de instalações)
+js/core    regras sem interface: dinheiro, datas, dados, cálculos e leitura do aparelho
 js/ui      peças de tela: elementos, gráficos em SVG, cédula, formulário, microinterações e instalação
-js/views   uma função para cada tela
+js/views   uma função para cada tela, incluindo o painel de instalações
+supabase   migration da tabela de instalações
 css        tokens.css (cores e fontes) e app.css
 sw.js      guarda uma cópia do app para abrir sem internet
 test       testes das regras e testes de ponta a ponta no navegador
@@ -73,6 +76,31 @@ Decisões que valem saber:
   trocar número de versão. Sem internet, ou se a rede demorar mais de 3 segundos, usa a última cópia. Ao criar um
   arquivo que a página carrega, inclua-o na lista de `sw.js`; o `npm test` avisa se faltar.
 
+## Contagem de instalações
+
+Para saber quantos aparelhos usam o app, e quais, o Sobra pode registrar cada aparelho em uma tabela `installs` no
+Supabase. Só dados técnicos: sistema e versão, navegador, modelo (quando o aparelho informa), tamanho da tela, versão
+do app e se ele está instalado. **Nenhum lançamento, saldo ou dado pessoal é enviado**, e `npm test` confere que o
+código de envio nem encosta nos dados financeiros.
+
+- **Aviso e recusa.** Na primeira abertura aparece um aviso curto com o botão **Recusar**. Nada é enviado antes da
+  resposta, e quem recusa nunca envia. A escolha pode ser mudada em **Ajustes**.
+- **Um registro por aparelho.** O aparelho cria um identificador aleatório (`crypto.randomUUID`), guarda no
+  `localStorage` e se registra; depois, só renova a data de último uso, no máximo uma vez por dia. Sem rede, nada
+  acontece e o app segue normal.
+- **Banco fechado.** O app só pode chamar a função `register_install`, que mexe apenas no registro do próprio
+  identificador. Ele não lê a tabela. A leitura exige login de administrador (lista `private.admins`).
+- **Painel.** Em `#/admin/instalacoes` (fora do menu): total de aparelhos, ativos em 7 e 30 dias, instalados como
+  app, novas instalações por dia e a divisão por sistema, modelo e navegador.
+
+Para ligar: aplique `supabase/migrations/20261111120000_installs.sql` no projeto, siga os dois passos do fim desse
+arquivo para criar o administrador e preencha `supabaseUrl` e `supabaseKey` em `js/config.js` com o endereço e a
+chave **pública** do projeto. A chave `service_role` nunca entra no código. Com os campos vazios, a contagem fica
+desligada.
+
+Limites: no iPhone o modelo exato não é informado (fica "iPhone"), e lá o app instalado guarda dados separados do
+Safari, então o mesmo iPhone pode contar duas vezes. Limpar os dados do navegador também gera um identificador novo.
+
 ## Testes
 
 ```bash
@@ -81,13 +109,15 @@ npm test             # regras de negócio, sem instalar nada (precisa do Node.js
 npm install          # só para os testes abaixo
 npm run test:e2e     # usa o app no Chrome: digita, clica, erra, desfaz, recarrega
 npm run test:mobile  # simula um celular: toque, abas, instalação e abrir com o servidor desligado
+npm run test:installs  # simula a contagem de instalações e o painel, com um Supabase de mentira
+npm run screenshots  # tira fotos das telas em 375 px e no computador
 ```
 
 Se o Chrome estiver em outro lugar, informe o caminho na variável `CHROME_PATH`.
 
 ## Limites conhecidos
 
-- Os dados não sincronizam entre aparelhos; para levar a outro navegador, use backup e restauração.
+- Os dados financeiros não sincronizam entre aparelhos; para levar a outro navegador, use backup e restauração.
 - Não está nas lojas de aplicativos: a instalação é feita pelo navegador.
 - Os testes de celular rodam em um Chrome simulando o aparelho, não em um iPhone ou Android de verdade.
 - Não há fatura de cartão de crédito: uma compra parcelada é lançada como parcelas mensais.

@@ -68,6 +68,8 @@
     chart: 'M4 20h16M7 16v-5M12 16V6M17 16V9',
     sliders: 'M4 7h9M17 7h3M4 17h3M11 17h9M15 5v4M9 15v4',
     inbox: 'M4 13l2.5-8h11L20 13M4 13v6h16v-6M4 13h4.5a3.5 3.5 0 0 0 7 0H20',
+    phone: 'M8 3h8a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H8a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1zM11 18h2',
+    shield: 'M12 3l7 3v5c0 4.5-3 8.5-7 10-4-1.5-7-5.5-7-10V6l7-3zM9.5 12l2 2 3.5-4',
   };
 
   function icon(name, size = 18) {

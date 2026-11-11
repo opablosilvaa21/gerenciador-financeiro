@@ -60,12 +60,17 @@
 
   /* ---------- Contagem dos valores ---------- */
 
-  /** Todo elemento com data-count (centavos) conta de zero até o valor. O texto final é sempre o exato. */
+  const formatInt = (value) => value.toLocaleString('pt-BR');
+
+  /**
+   * Todo elemento com data-count conta de zero até o valor: centavos, ou um número inteiro quando traz
+   * data-count-format="int". O texto final é sempre o exato.
+   */
   function countUp(scope) {
     const nodes = [...scope.querySelectorAll('[data-count]')];
     if (!nodes.length || reduced()) return;
     const items = nodes
-      .map((node) => ({ node, cents: Number(node.dataset.count), final: node.textContent }))
+      .map((node) => ({ node, cents: Number(node.dataset.count), final: node.textContent, format: node.dataset.countFormat === 'int' ? formatInt : FM.money.format }))
       .filter((item) => Number.isFinite(item.cents) && item.cents !== 0);
     if (!items.length) return;
     const start = root.performance.now();
@@ -74,7 +79,7 @@
       const eased = 1 - (1 - progress) ** 4;
       for (const item of items) {
         if (!item.node.isConnected) continue;
-        item.node.textContent = progress < 1 ? FM.money.format(Math.round(item.cents * eased)) : item.final;
+        item.node.textContent = progress < 1 ? item.format(Math.round(item.cents * eased)) : item.final;
       }
       if (progress < 1 && items.some((item) => item.node.isConnected)) root.requestAnimationFrame(tick);
     };

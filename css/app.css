@@ -331,6 +331,19 @@ main {
   font-weight: 500;
 }
 
+.banner-privacy > span {
+  flex: 1 1 320px;
+}
+
+.plain-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-left: 18px;
+  list-style: disc;
+  color: var(--ink-2);
+}
+
 /* ---------- Cabeçalho das telas ---------- */
 
 .page-head {
@@ -993,6 +1006,23 @@ button.rule-part:hover {
   display: block;
   height: 100%;
   border-radius: 0 4px 4px 0;
+}
+
+.ranking-bar-accent {
+  background: var(--accent-text);
+}
+
+.bar-accent {
+  fill: var(--accent-text);
+}
+
+.admin-login {
+  width: min(440px, 100%);
+}
+
+.view-admin .data-table th,
+.view-admin .data-table td {
+  white-space: nowrap;
 }
 
 .ranking-value strong {
@@ -2916,6 +2946,11 @@ kbd {
     animation: none !important;
     transition: none !important;
     scroll-behavior: auto !important;
+  }
+
+  /* Sem a animação de traçado, o desenho da cédula já aparece inteiro. */
+  .note-rosette.is-drawing path {
+    stroke-dashoffset: 0;
   }
 
   .ripple {
