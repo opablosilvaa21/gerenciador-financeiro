@@ -103,6 +103,27 @@ tudo o que o app guarda, no mesmo formato do backup em JSON.
 
 Migration: `supabase/migrations/20261113120000_vaults.sql` (cole no SQL Editor do Supabase e rode).
 
+## Versão para a Play Store
+
+O app Android é o próprio site embrulhado em uma Trusted Web Activity (Bubblewrap): abre em tela cheia, sem barra de
+navegador, e recebe as mesmas atualizações automáticas do site. `android/twa-manifest.json` descreve o pacote
+(`io.github.opablosilvaa21.sobrafinance`); `.well-known/assetlinks.json` é publicado com o site e diz ao Android que
+o app e o site são da mesma pessoa (sem ele, o app abre com a barra do navegador). `privacidade.html` é a política de
+privacidade que a Play Store exige.
+
+Para gerar um app novo (a cada versão, suba `appVersionCode` e `appVersionName` no twa-manifest):
+
+```bash
+# precisa do JDK 17, do Android SDK (build-tools 36.1.0) e de npm i -g @bubblewrap/cli
+cd <pasta-do-projeto-android>        # fora deste repositório; tem twa-manifest.json e a chave de assinatura
+bubblewrap update --skipVersionUpgrade
+gradlew.bat assembleRelease bundleRelease
+# assinar: zipalign + apksigner (APK) e jarsigner (AAB) com a chave do keystore
+```
+
+A chave de assinatura (`.keystore`) e as senhas dela **nunca entram no repositório**. Sem ela não dá para publicar
+atualizações na Play Store, então mantenha cópia em lugar seguro.
+
 ## Contagem de instalações
 
 Para saber quantos aparelhos usam o app, e quais, o Sobra pode registrar cada aparelho em uma tabela `installs` no

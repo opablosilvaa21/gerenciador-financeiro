@@ -67,3 +67,16 @@ test('os endereços do manifesto são relativos, para funcionar dentro da pasta 
     assert.ok(url.startsWith('./'), url);
   }
 });
+
+test('o site publica o que a versão Android precisa: assetlinks e a política de privacidade', () => {
+  const links = JSON.parse(read('.well-known/assetlinks.json'));
+  const twa = JSON.parse(read('android/twa-manifest.json'));
+  assert.equal(links[0].target.package_name, twa.packageId);
+  assert.match(links[0].target.sha256_cert_fingerprints[0], /^([0-9A-F]{2}:){31}[0-9A-F]{2}$/);
+  assert.equal(twa.host, 'opablosilvaa21.github.io');
+  assert.match(twa.startUrl, /^\/gerenciador-financeiro\//);
+  const copy = read('.github/workflows/publicar.yml').split('\n').find((l) => l.trim().startsWith('cp -r '));
+  for (const file of ['.well-known', 'privacidade.html']) assert.ok(copy.includes(` ${file} `), `${file} não seria publicado`);
+  assert.match(read('privacidade.html'), /Política de privacidade/);
+  assert.ok(!fs.existsSync(path.join(ROOT, 'android', 'app')), 'o projeto Android gerado (com chaves) não deve estar no repositório');
+});

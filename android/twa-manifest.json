@@ -1,0 +1,50 @@
+{
+  "packageId": "io.github.opablosilvaa21.sobrafinance",
+  "host": "opablosilvaa21.github.io",
+  "name": "Sobra Finance",
+  "launcherName": "Sobra Finance",
+  "display": "standalone",
+  "themeColor": "#f4f5ef",
+  "themeColorDark": "#0b0f0d",
+  "navigationColor": "#f4f5ef",
+  "navigationColorDark": "#0b0f0d",
+  "navigationDividerColor": "#c7cbb8",
+  "navigationDividerColorDark": "#1b2a22",
+  "backgroundColor": "#f4f5ef",
+  "enableNotifications": false,
+  "startUrl": "/gerenciador-financeiro/",
+  "iconUrl": "https://opablosilvaa21.github.io/gerenciador-financeiro/assets/icone-512.png",
+  "maskableIconUrl": "https://opablosilvaa21.github.io/gerenciador-financeiro/assets/icone-maskable-512.png",
+  "splashScreenFadeOutDuration": 300,
+  "signingKey": {
+    "path": "C:\\Users\\Pc\\sobra-android\\chaves\\sobra-finance.keystore",
+    "alias": "sobrafinance"
+  },
+  "appVersionName": "1.3.0",
+  "appVersionCode": 1,
+  "shortcuts": [
+    {
+      "name": "Novo lançamento",
+      "shortName": "Novo",
+      "url": "/gerenciador-financeiro/#/inicio?novo=1",
+      "chosenIconUrl": "https://opablosilvaa21.github.io/gerenciador-financeiro/assets/icone-192.png"
+    }
+  ],
+  "generatorApp": "bubblewrap-cli",
+  "webManifestUrl": "https://opablosilvaa21.github.io/gerenciador-financeiro/manifest.webmanifest",
+  "fullScopeUrl": "https://opablosilvaa21.github.io/gerenciador-financeiro/",
+  "minSdkVersion": 24,
+  "orientation": "default",
+  "fingerprints": [],
+  "additionalTrustedOrigins": [],
+  "retainedBundles": [],
+  "appVersion": "1.3.0",
+  "isChromeOSOnly": false,
+  "isMetaQuest": false,
+  "fallbackType": "customtabs",
+  "features": {},
+  "alphaDependencies": {
+    "enabled": false
+  },
+  "enableSiteSettingsShortcut": true
+}
