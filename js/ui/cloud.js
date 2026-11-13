@@ -20,7 +20,7 @@
   const CHECK_EVERY_MS = 5 * 60 * 1000;
 
   /** status: off | idle | pending | syncing | offline | error | choice. available: o banco já tem a tabela da nuvem. */
-  const view = { status: 'off', lastSync: null, error: null, choice: null, available: readAvailable() };
+  const view = { status: 'off', lastSync: null, error: null, choice: null, available: readAvailable(), recovery: false };
   const listeners = new Set();
   let store = null;
   let applying = false;
@@ -95,6 +95,12 @@
     }
     if (available !== view.available) setView({ available });
     if (available && signedIn()) syncNow();
+    // O código de recuperação existe neste banco? Uma chamada com senha vazia é recusada antes de contar tentativa.
+    if (available) {
+      const probe = await backend.rpc('reset_password_with_code', { p_email: '', p_code: '', p_new_password: '' });
+      const recovery = probe.status !== 404 && probe.status !== 0;
+      if (recovery !== view.recovery) setView({ recovery });
+    }
   }
 
   const enabled = () => backend.configured() && view.available;

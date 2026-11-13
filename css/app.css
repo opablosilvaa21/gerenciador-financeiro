@@ -2593,6 +2593,108 @@ kbd {
   }
 }
 
+/* ---------- Cartão de crédito ---------- */
+
+.account .card-bill {
+  grid-column: 1 / -1;
+}
+
+.card-bill {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 2px 0 8px;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface-sunken);
+}
+
+.card-bill-line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px 12px;
+  font-weight: 600;
+}
+
+.card-bill-line .badge {
+  margin-left: 6px;
+}
+
+.card-bill-nav {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  text-align: center;
+}
+
+.card-bill-total {
+  display: block;
+  font: 600 28px/1.2 var(--font-figures);
+  letter-spacing: -0.04em;
+}
+
+.card-hint {
+  margin-top: -8px;
+}
+
+/* ---------- Lembretes ---------- */
+
+.reminder-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.reminder a {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding: 10px 12px;
+  border-left: 3px solid var(--line-strong);
+  border-radius: 8px;
+  background: var(--surface-sunken);
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.reminder.is-urgent a {
+  border-left-color: var(--meter-critical);
+}
+
+.reminder span {
+  color: var(--ink-2);
+  font-size: 14px;
+}
+
+/* ---------- Código de recuperação ---------- */
+
+.recovery-code {
+  padding: 16px;
+  border: 1px dashed var(--line-strong);
+  border-radius: 12px;
+  background: var(--surface-sunken);
+  color: var(--ink);
+  font: 600 22px/1.3 var(--font-figures);
+  letter-spacing: 0.06em;
+  text-align: center;
+  user-select: all;
+  overflow-wrap: anywhere;
+}
+
+.recovery-input {
+  font-family: var(--font-figures);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.recovery-missing {
+  border-color: var(--status-warning);
+}
+
 /* ---------- Telas menores ---------- */
 
 @media (max-width: 1000px) {

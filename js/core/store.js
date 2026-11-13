@@ -15,6 +15,7 @@
     poupanca: 'Poupança',
     carteira: 'Dinheiro vivo',
     investimento: 'Investimento',
+    cartao: 'Cartão de crédito',
   };
 
   function uid() {
@@ -125,7 +126,10 @@
       };
       if (input.type === 'transfer') {
         if (!input.toAccountId || input.toAccountId === input.accountId) throw new Error('Carteiras inválidas');
-        return { ...base, toAccountId: input.toAccountId, categoryId: null };
+        const transfer = { ...base, toAccountId: input.toAccountId, categoryId: null };
+        // Pagamento de fatura de cartão: diz de qual fatura (mês do vencimento) é o pagamento.
+        if (/^\d{4}-\d{2}$/.test(input.billMonth || '')) transfer.billMonth = input.billMonth;
+        return transfer;
       }
       return { ...base, categoryId: input.categoryId };
     }
@@ -295,7 +299,10 @@
           const next = buildTransaction({ ...tx, ...changes });
           Object.assign(tx, next, { id: tx.id });
           if (next.type === 'transfer') tx.categoryId = null;
-          else delete tx.toAccountId;
+          else {
+            delete tx.toAccountId;
+            delete tx.billMonth;
+          }
         });
       },
 

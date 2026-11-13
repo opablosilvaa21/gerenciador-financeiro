@@ -72,11 +72,24 @@
     );
 
     const paidInput = el('input', { type: 'checkbox', checked: tx ? tx.paid : true });
+    // No cartão de crédito, a compra já está feita: o que se paga é a fatura. Mostra em qual fatura ela cai.
+    const cardHint = el('p', { class: 'field-hint card-hint', hidden: true });
+    const selectedCard = () => {
+      const account = q.accountOf(state, accountSelect.value);
+      return type !== 'transfer' && FM.cards.isCard(account) ? account : null;
+    };
+    function syncCard() {
+      const card = selectedCard();
+      cardHint.hidden = !card;
+      cardHint.textContent = card ? FM.cardUi.purchaseHint(card, dateInput.value) : '';
+      paidBox.hidden = type === 'transfer' || Boolean(card);
+    }
     const paidLabelText = el('span', {});
     const paidBox = el('label', { class: 'check-line' }, paidInput, paidLabelText);
     let paidTouched = isEdit;
     paidInput.addEventListener('change', () => { paidTouched = true; });
-    dateInput.addEventListener('change', () => syncPaid());
+    dateInput.addEventListener('change', () => { syncPaid(); syncCard(); });
+    accountSelect.addEventListener('change', () => syncCard());
 
     /** Data futura costuma ser conta a pagar. Só sugere enquanto a pessoa não mexeu na caixa. */
     function syncPaid() {
@@ -183,6 +196,7 @@
       categoryField.hidden = transfer;
       toField.hidden = !transfer;
       paidBox.hidden = transfer;
+      syncCard();
       accountField.querySelector('label').textContent = transfer ? 'De qual carteira' : 'Carteira';
       paidLabelText.textContent = type === 'income' ? 'Já recebi' : 'Já paguei';
       repeatField.hidden = isEdit || transfer;
@@ -213,6 +227,7 @@
       descList,
       categoryField,
       el('div', { class: 'form-row' }, accountField, toField),
+      cardHint,
       paidBox,
       repeatField,
     );
@@ -252,7 +267,7 @@
         categoryId: type === 'transfer' ? null : categoryId,
         accountId: accountSelect.value,
         toAccountId: type === 'transfer' ? toSelect.value : undefined,
-        paid: type === 'transfer' ? true : paidInput.checked,
+        paid: type === 'transfer' || selectedCard() ? true : paidInput.checked,
         repeat: repeat === 'installments' ? { mode: 'installments', count } : { mode: repeat },
       };
     }

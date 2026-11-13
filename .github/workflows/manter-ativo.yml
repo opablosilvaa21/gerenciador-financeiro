@@ -1,0 +1,31 @@
+# Mantém o projeto do Supabase acordado.
+#
+# No plano grátis, o Supabase pausa o projeto depois de uma semana sem uso, e aí a Nuvem e a contagem de
+# aparelhos param até alguém reativar pelo painel. Uma chamada por dia à função keep_alive() conta como uso.
+# Usa só a chave pública, a mesma que já está em js/config.js.
+#
+# Atenção: o GitHub desliga tarefas agendadas de repositórios sem nenhum commit por 60 dias. Se isso
+# acontecer, ele avisa por e-mail e basta reativar em Actions.
+name: Manter o Supabase ativo
+
+on:
+  schedule:
+    - cron: '17 9 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Chamar keep_alive
+        run: |
+          URL=$(grep -oE "supabaseUrl: '[^']+'" js/config.js | cut -d"'" -f2)
+          KEY=$(grep -oE "supabaseKey: '[^']+'" js/config.js | cut -d"'" -f2)
+          STATUS=$(curl -s -o /tmp/resposta -w "%{http_code}" -X POST "$URL/rest/v1/rpc/keep_alive" -H "apikey: $KEY" -H "Content-Type: application/json" -d '{}')
+          echo "Resposta: $STATUS $(cat /tmp/resposta)"
+          # Antes da migration com keep_alive, a função não existe (404); mesmo assim a chamada chega ao banco.
+          if [ "$STATUS" != "200" ] && [ "$STATUS" != "404" ]; then exit 1; fi

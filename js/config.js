@@ -12,7 +12,7 @@
   const FM = (root.FM = root.FM || {});
 
   FM.config = {
-    appVersion: '1.3.0',
+    appVersion: '1.4.0',
     // Trocado pela publicação automática por data e commit (ex.: 202611111530-c04ea53). Fora dela, fica assim.
     build: '__BUILD__',
     // Recuperar a senha por e-mail precisa de um serviço de e-mail próprio no Supabase (o embutido só entrega para a
