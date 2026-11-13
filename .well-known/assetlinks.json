@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "io.github.opablosilvaa21.sobrafinance",
+      "sha256_cert_fingerprints": [
+        "C8:1F:83:EF:3C:4C:B9:CF:69:3F:76:AC:4E:D5:40:E3:A5:3B:81:F6:E7:DC:2B:D4:77:83:6F:ED:4B:05:A2:63"
+      ]
+    }
+  }
+]

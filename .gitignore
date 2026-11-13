@@ -1,2 +1,8 @@
 node_modules/
 *.log
+
+# Projeto Android gerado e chaves de assinatura: ficam fora do repositório
+android/app/
+android/build/
+*.keystore
+*.jks
