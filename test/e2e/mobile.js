@@ -130,7 +130,7 @@ const box = (selector) => page.$eval(selector, (n) => {
   });
   await step('"Mais" abre as outras telas e fica marcada nelas', async () => {
     await tapTab('Mais');
-    assert.deepEqual(await page.$$eval('dialog[open] .more-link', (ns) => ns.map((n) => n.textContent)), ['Carteiras', 'Contas fixas', 'Metas', 'Relatórios', 'Ajustes']);
+    assert.deepEqual(await page.$$eval('dialog[open] .more-link', (ns) => ns.map((n) => n.textContent)), ['Carteiras', 'Contas fixas', 'Metas', 'Relatórios', 'Nuvem', 'Ajustes']);
     await tap('Metas', 'dialog[open]');
     await delay(60);
     assert.equal(await page.$('dialog[open]'), null);

@@ -2422,6 +2422,177 @@ kbd {
   background: var(--skeleton);
 }
 
+
+/* ---------- Nuvem ---------- */
+
+.cloud-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  width: fit-content;
+  margin: -16px 0 18px 10px;
+  padding: 3px 10px 3px 8px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface-solid);
+  color: var(--ink-2);
+  font-size: 12.5px;
+  font-weight: 550;
+  text-decoration: none;
+}
+
+.cloud-chip-good {
+  color: var(--status-good);
+  border-color: var(--status-good-wash);
+  background: var(--status-good-wash);
+}
+
+.cloud-chip-warn {
+  color: var(--status-warning);
+  border-color: var(--status-warning-wash);
+  background: var(--status-warning-wash);
+}
+
+.cloud-chip-top {
+  display: none;
+}
+
+.banner-cloud > span {
+  flex: 1 1 260px;
+}
+
+.welcome-restore {
+  margin-top: 6px;
+  color: var(--ink-2);
+  font-size: 14.5px;
+}
+
+.cloud-benefits {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+.cloud-benefits li {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.cloud-benefits strong {
+  display: block;
+  margin-bottom: 2px;
+}
+
+.cloud-benefits p {
+  color: var(--ink-2);
+  font-size: 14px;
+}
+
+.cloud-benefit-icon,
+.cloud-status-icon {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: var(--accent-wash);
+  color: var(--accent-text);
+}
+
+.cloud-form {
+  max-width: 440px;
+}
+
+.cloud-status {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 14px 18px;
+}
+
+.cloud-status p {
+  color: var(--ink-2);
+}
+
+/* O ícone da nuvem já marca o título: o pontinho dos outros cartões sai. */
+.cloud-status h2::before {
+  display: none;
+}
+
+.cloud-status.cloud-good .cloud-status-icon {
+  background: var(--status-good-wash);
+  color: var(--status-good);
+}
+
+.cloud-status.cloud-warn .cloud-status-icon {
+  background: var(--status-warning-wash);
+  color: var(--status-warning);
+}
+
+.cloud-status.cloud-busy .cloud-status-icon .icon {
+  animation: none;
+}
+
+.cloud-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+  padding-left: 20px;
+  color: var(--ink-2);
+}
+
+.cloud-wait {
+  align-items: flex-start;
+}
+
+.choice-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.choice {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  width: 100%;
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--surface-solid);
+  text-align: left;
+}
+
+.choice:hover,
+.choice:focus-visible {
+  border-color: var(--accent-text);
+  background: var(--accent-wash);
+}
+
+.choice span {
+  color: var(--ink-2);
+  font-size: 14px;
+}
+
+.app-version {
+  text-align: center;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .cloud-status.cloud-busy .cloud-status-icon .icon {
+    animation: spin 1.4s linear infinite;
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 /* ---------- Telas menores ---------- */
 
 @media (max-width: 1000px) {
@@ -2473,6 +2644,26 @@ kbd {
 
   .is-onboarding .brand-top {
     display: none;
+  }
+
+  .content {
+    position: relative;
+  }
+
+  .cloud-chip-top:not([hidden]) {
+    display: inline-flex;
+    position: absolute;
+    top: calc(env(safe-area-inset-top) + 14px);
+    right: max(16px, env(safe-area-inset-right));
+    margin: 0;
+  }
+
+  .cloud-status {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .cloud-status .action-list {
+    grid-column: 1 / -1;
   }
 
   main {

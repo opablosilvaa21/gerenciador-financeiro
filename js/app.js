@@ -12,10 +12,15 @@
     { key: 'fixas', label: 'Contas fixas', view: 'recurring', icon: 'repeat' },
     { key: 'metas', label: 'Metas', view: 'goals', icon: 'target' },
     { key: 'relatorios', label: 'Relatórios', view: 'reports', icon: 'chart' },
+    // A Nuvem abre também antes de começar: é por ela que um celular novo recupera os lançamentos.
+    { key: 'nuvem', label: 'Nuvem', view: 'cloud', icon: 'cloud', public: true, cloud: true },
     { key: 'ajustes', label: 'Ajustes', view: 'settings', icon: 'sliders' },
     // Fora do menu: só chega aqui quem conhece o endereço, e os números só saem do banco com login de administrador.
-    { key: 'admin/instalacoes', label: 'Instalações', view: 'adminInstalls', icon: 'chart', hidden: true },
+    { key: 'admin/instalacoes', label: 'Instalações', view: 'adminInstalls', icon: 'chart', hidden: true, public: true },
   ];
+
+  /** No menu: tudo menos o painel escondido, e a Nuvem só onde ela funciona (no endereço publicado). */
+  const inMenu = (r) => !r.hidden && (!r.cloud || FM.cloud.enabled());
 
   let storage = null;
   try {
@@ -85,7 +90,7 @@
 
   function renderNav(route) {
     nav.replaceChildren(
-      ...ROUTES.filter((r) => !r.hidden).map((r) =>
+      ...ROUTES.filter(inMenu).map((r) =>
         el('a', { href: `#/${r.key}`, class: 'nav-link', 'aria-current': r.key === route.key ? 'page' : null }, FM.dom.icon(r.icon, 18), el('span', {}, r.label)),
       ),
     );
@@ -133,7 +138,7 @@
       body: el(
         'ul',
         { class: 'more-list' },
-        ROUTES.filter((r) => !r.tab && !r.hidden).map((r) =>
+        ROUTES.filter((r) => !r.tab && inMenu(r)).map((r) =>
           el('li', {}, el('a', {
             href: `#/${r.key}`,
             class: 'more-link',
@@ -157,7 +162,7 @@
           { class: 'plain-list' },
           ['um identificador aleatório criado neste aparelho', 'sistema e versão (por exemplo, Android 15)', 'navegador e, quando o aparelho informa, o modelo', 'tamanho da tela, versão do app e se ele está instalado'].map((item) => el('li', {}, item)),
         ),
-        el('p', {}, 'Nunca são enviados lançamentos, saldos, categorias, nome, e-mail, localização nem endereço IP. Seus dados financeiros continuam só neste aparelho.'),
+        el('p', {}, 'A contagem nunca envia lançamentos, saldos, categorias, nome, e-mail, localização nem endereço IP. Seus dados financeiros só vão para a nuvem se você criar uma conta em Nuvem, e aí ficam guardados na sua conta.'),
         el('p', { class: 'field-hint' }, 'Você pode mudar essa escolha quando quiser, em Ajustes.'),
       ),
     });
@@ -177,10 +182,27 @@
       banners.append(el(
         'div',
         { class: 'banner banner-privacy', role: 'region', 'aria-label': 'Aviso de privacidade' },
-        el('span', {}, 'O Sobra Finance conta quantos aparelhos usam o app. Para isso envia dados técnicos anônimos do aparelho (sistema, navegador e modelo). Nenhum dado financeiro ou pessoal sai daqui.'),
+        el('span', {}, 'O Sobra Finance conta quantos aparelhos usam o app. Para isso envia dados técnicos anônimos do aparelho (sistema, navegador e modelo). A contagem não envia nenhum dado financeiro nem pessoal.'),
         el('button', { class: 'button button-small button-primary', type: 'button', onclick: () => FM.telemetry.accept() }, 'Tudo bem'),
         el('button', { class: 'button button-small', type: 'button', onclick: () => FM.telemetry.refuse() }, 'Recusar'),
         el('button', { class: 'link-button', type: 'button', onclick: privacyDetails }, 'O que é enviado'),
+      ));
+    }
+    const cloud = FM.cloud.status();
+    if (cloud.status === 'choice') {
+      banners.append(el(
+        'div',
+        { class: 'banner banner-cloud', role: 'alert' },
+        el('span', {}, 'Este aparelho e a sua conta na nuvem têm lançamentos diferentes.'),
+        el('button', { class: 'button button-small button-primary', type: 'button', onclick: () => FM.views.cloudChoice(ctx) }, 'Escolher o que fazer'),
+      ));
+    } else if (cloudInviteVisible()) {
+      banners.append(el(
+        'div',
+        { class: 'banner banner-cloud' },
+        el('span', {}, 'Proteja seus lançamentos: guarde uma cópia na nuvem e recupere tudo se trocar ou perder o celular.'),
+        el('button', { class: 'button button-small button-primary', type: 'button', onclick: () => ctx.go('nuvem') }, 'Ativar backup'),
+        el('button', { class: 'link-button', type: 'button', onclick: () => dismissCloudInvite() }, 'Agora não'),
       ));
     }
     if (store.state.onboarded && FM.pwa.showOffer()) {
@@ -232,7 +254,7 @@
         'div',
         { class: 'welcome-text' },
         el('h1', { id: 'page-title', tabIndex: -1 }, 'Quanto sobra no fim do mês?'),
-        el('p', {}, 'Registre o que entra e o que sai. O Sobra Finance imprime o resultado do mês em uma cédula, e ela muda de cor se faltar. Seus lançamentos ficam só neste navegador.'),
+        el('p', {}, 'Registre o que entra e o que sai. O Sobra Finance imprime o resultado do mês em uma cédula, e ela muda de cor se faltar. Seus lançamentos ficam no aparelho e, se você quiser, guardados na nuvem.'),
         el(
           'form',
           {
@@ -264,6 +286,16 @@
               onclick: () => store.replace('Dados de exemplo', demo.buildDemoState(store.today())),
             }, 'Ver com dados de exemplo'),
           ),
+          FM.cloud.enabled() && el('p', { class: 'welcome-restore' },
+            'Trocou de celular? ',
+            el('button', {
+              class: 'link-button',
+              type: 'button',
+              onclick: () => {
+                FM.views.cloudStartSignIn();
+                ctx.go('nuvem');
+              },
+            }, 'Já tenho conta: recuperar meus lançamentos')),
         ),
       ),
     ));
@@ -277,9 +309,11 @@
     booted = true;
     applyTheme();
     tip.hide();
-    // O painel de instalações não depende dos dados do app: abre mesmo em um aparelho que nunca usou o Sobra Finance.
-    const onboarding = !store.state.onboarded && !currentRoute().hidden;
-    document.body.classList.toggle('is-onboarding', onboarding);
+    // O painel de instalações e a Nuvem não dependem dos dados do app: abrem mesmo antes de começar.
+    // A Nuvem, nesse caso, aparece sem menu, como a boas-vindas.
+    const preStart = !store.state.onboarded;
+    const onboarding = preStart && !currentRoute().public;
+    document.body.classList.toggle('is-onboarding', preStart && !currentRoute().hidden);
     renderBanners();
 
     if (onboarding) {
@@ -363,6 +397,67 @@
   });
 
   FM.pwa.onChange(() => render({ keepFocus: true }));
+
+  /* ---------- Nuvem ---------- */
+
+  const INVITE_KEY = 'sobra.nuvem.convite';
+
+  function cloudInviteVisible() {
+    if (!FM.cloud.enabled() || FM.cloud.signedIn() || !store.state.onboarded || store.state.demo) return false;
+    if (store.state.transactions.length < 3 || currentRoute().key === 'nuvem') return false;
+    try {
+      return root.localStorage.getItem(INVITE_KEY) !== '1';
+    } catch {
+      return false;
+    }
+  }
+
+  function dismissCloudInvite() {
+    try {
+      root.localStorage.setItem(INVITE_KEY, '1');
+    } catch {
+      // Sem armazenamento, o convite volta na próxima visita.
+    }
+    renderBanners();
+  }
+
+  /** O indicador ao lado da marca: diz se está tudo na nuvem e leva para a tela da Nuvem. */
+  const CHIP = {
+    idle: ['cloud', 'Na nuvem', 'good'],
+    pending: ['clock', 'Salvando…', 'busy'],
+    syncing: ['repeat', 'Salvando…', 'busy'],
+    offline: ['cloudOff', 'Sem internet', 'warn'],
+    error: ['alert', 'Erro na nuvem', 'warn'],
+    choice: ['alert', 'Escolha pendente', 'warn'],
+  };
+  const chips = [
+    el('a', { class: 'cloud-chip', href: '#/nuvem', hidden: true }),
+    el('a', { class: 'cloud-chip cloud-chip-top', href: '#/nuvem', hidden: true }),
+  ];
+  document.querySelector('.side .brand').after(chips[0]);
+  document.querySelector('.brand-top').after(chips[1]);
+
+  function updateCloudChip(view) {
+    const spec = FM.cloud.signedIn() && CHIP[view.status];
+    for (const chip of chips) {
+      chip.hidden = !spec;
+      if (!spec) continue;
+      chip.className = `${chip.classList.contains('cloud-chip-top') ? 'cloud-chip cloud-chip-top' : 'cloud-chip'} cloud-chip-${spec[2]}`;
+      chip.setAttribute('aria-label', `Nuvem: ${spec[1]}`);
+      chip.replaceChildren(FM.dom.icon(spec[0], 14), el('span', {}, spec[1]));
+    }
+  }
+
+  let lastCloudStatus = null;
+  FM.cloud.onChange((view) => {
+    updateCloudChip(view);
+    renderBanners();
+    // A tela da Nuvem mostra o estado: redesenha quando ele muda (sem atrapalhar um formulário aberto).
+    if (view.status !== lastCloudStatus && currentRoute().key === 'nuvem' && !document.querySelector('dialog[open]')) render({ keepFocus: true });
+    lastCloudStatus = view.status;
+  });
+  FM.backend.onAuthChange(() => updateCloudChip(FM.cloud.status()));
+  FM.cloud.start(store);
   FM.telemetry.onChange(() => render({ keepFocus: true }));
 
   ctx.params = parseHash().params;

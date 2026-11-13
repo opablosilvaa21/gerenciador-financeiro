@@ -191,7 +191,7 @@ const settle = () => delay(400);
     await shot(page, 'instalacoes-1-aviso-de-privacidade.png');
     await clickText(page, 'O que é enviado', '#banners');
     await page.waitForSelector('dialog[open]');
-    assert.match(await page.$eval('dialog[open]', (n) => n.textContent), /Nunca são enviados lançamentos/);
+    assert.match(await page.$eval('dialog[open]', (n) => n.textContent), /A contagem nunca envia lançamentos/);
     await context.close();
   });
 

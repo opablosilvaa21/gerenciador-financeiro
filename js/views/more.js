@@ -406,7 +406,9 @@
           'div',
           { class: 'band-head' },
           el('h2', {}, 'Seus dados'),
-          el('p', { class: 'chart-sub' }, 'Seus lançamentos, saldos e metas ficam só neste navegador, neste aparelho, e nunca são enviados para a internet. Limpar os dados do navegador apaga o Sobra Finance, então baixe um backup de vez em quando.'),
+          el('p', { class: 'chart-sub' }, FM.cloud.signedIn()
+            ? 'Seus lançamentos ficam neste aparelho e também na sua conta na nuvem, que se atualiza sozinha. O arquivo de backup continua disponível para guardar uma cópia por conta própria.'
+            : 'Seus lançamentos, saldos e metas ficam neste aparelho. Limpar os dados do navegador apaga o Sobra Finance: ative a Nuvem para guardar uma cópia na sua conta, ou baixe um backup de vez em quando.'),
         ),
         el(
           'div',
