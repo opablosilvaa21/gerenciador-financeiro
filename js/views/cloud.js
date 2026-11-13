@@ -5,7 +5,7 @@
   const { common } = FM;
 
   /** Estado da tela que não está nos dados: formulário escolhido, e-mail esperando confirmação, envio em andamento. */
-  const ui = { mode: 'signup', waitingEmail: null, prefill: '', busy: false, notice: null, redirectHandled: false };
+  const ui = { mode: 'signup', waitingEmail: null, prefill: '', busy: false, notice: null, redirectHandled: false, hasCode: undefined };
 
   const ERRORS = {
     invalid_credentials: 'E-mail ou senha incorretos.',
@@ -90,9 +90,9 @@
     const emailInput = el('input', { class: 'input', type: 'email', autocomplete: 'username', inputMode: 'email', required: true, value: ui.prefill || '' });
     const passInput = passwordInput(signup ? 'new-password' : 'current-password');
     const emailField = field('E-mail', emailInput);
-    const recoverable = FM.config.emailRecovery;
+    const recoverable = FM.config.emailRecovery || FM.cloud.status().recovery;
     const passField = field('Senha', passInput, {
-      hint: signup ? (recoverable ? 'Pelo menos 8 caracteres.' : 'Pelo menos 8 caracteres. Anote a senha: por enquanto ela não pode ser recuperada por e-mail.') : null,
+      hint: signup ? (recoverable ? 'Pelo menos 8 caracteres.' : 'Pelo menos 8 caracteres. Anote a senha: por enquanto ela não pode ser recuperada.') : null,
     });
     const submit = el('button', { class: 'button button-primary', type: 'submit', disabled: ui.busy }, ui.busy ? 'Aguarde…' : signup ? 'Criar conta e guardar' : 'Entrar e recuperar');
 
@@ -134,6 +134,8 @@
       toast(signup ? 'Conta criada. Seus lançamentos vão para a nuvem.' : 'Pronto, você entrou.');
       ctx.refresh();
       FM.cloud.syncNow();
+      // Conta nova: já sai com o código de recuperação, mostrado uma vez para a pessoa guardar.
+      if (signup) createRecoveryCode(ctx);
     };
 
     return el(
@@ -150,7 +152,145 @@
       passField,
       showPasswordToggle(passInput),
       el('div', { class: 'action-list' }, submit,
-        !signup && recoverable && el('button', { class: 'link-button', type: 'button', onclick: () => openRecover(emailInput.value.trim()) }, 'Esqueci minha senha')),
+        !signup && recoverable && el('button', { class: 'link-button', type: 'button', onclick: () => (FM.config.emailRecovery ? openRecover(emailInput.value.trim()) : openRecoverWithCode(ctx, emailInput.value.trim())) }, 'Esqueci minha senha')),
+    );
+  }
+
+  /* ---------- Código de recuperação ---------- */
+
+  const CODE_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+
+  /** 16 letras e números sem os que se confundem (0/O, 1/I/L), em 4 grupos: ABCD-EFGH-JKMN-PQRS. */
+  function newRecoveryCode() {
+    const bytes = root.crypto.getRandomValues(new Uint8Array(16));
+    const chars = [...bytes].map((b) => CODE_ALPHABET[b % CODE_ALPHABET.length]).join('');
+    return chars.match(/.{4}/g).join('-');
+  }
+
+  /** Mostra o código uma vez. Só fecha depois de a pessoa confirmar que guardou. */
+  function showRecoveryCode(code, { title = 'Guarde seu código de recuperação', onClose = null } = {}) {
+    const done = el('button', { class: 'button button-primary', type: 'button', disabled: true }, 'Pronto');
+    const check = el('input', { type: 'checkbox', onchange: () => { done.disabled = !check.checked; } });
+    let handle = null;
+    done.addEventListener('click', () => handle.close());
+    handle = openDialog({
+      title,
+      description: 'Se esquecer a senha, este código é o único jeito de recuperar a conta e os lançamentos da nuvem. Guarde fora do celular: anote num papel ou mande para o seu e-mail.',
+      body: el('div', { class: 'form' },
+        el('p', { class: 'recovery-code', 'aria-label': `Código: ${code.split('').join(' ')}` }, code),
+        el('div', { class: 'action-list' },
+          el('button', { class: 'button button-small', type: 'button', onclick: async () => {
+            try {
+              await root.navigator.clipboard.writeText(code);
+              toast('Código copiado');
+            } catch {
+              toast('Não deu para copiar: anote o código.');
+            }
+          } }, 'Copiar'),
+          el('button', { class: 'button button-small', type: 'button', onclick: () => FM.dom.download('sobra-finance-codigo-de-recuperacao.txt', `Código de recuperação do Sobra Finance: ${code}\nUse em "Esqueci minha senha", na tela Nuvem.\n`, 'text/plain') }, 'Baixar arquivo')),
+        el('label', { class: 'check-line' }, check, el('span', {}, 'Guardei o código em lugar seguro'))),
+      footer: done,
+      onClose,
+    });
+    // Sem "fechar sem querer": o X e o toque fora só valem depois de confirmar.
+    handle.dialog.addEventListener('cancel', (event) => {
+      if (!done.disabled) return;
+      event.preventDefault();
+      event.stopImmediatePropagation();
+    }, true);
+    handle.dialog.addEventListener('mousedown', (event) => { if (done.disabled && event.target === handle.dialog) event.stopImmediatePropagation(); }, true);
+    handle.dialog.querySelector('[aria-label="Fechar"]').hidden = true;
+    check.addEventListener('change', () => { handle.dialog.querySelector('[aria-label="Fechar"]').hidden = !check.checked; });
+    return handle;
+  }
+
+  /** Cria (ou troca) o código da conta logada e mostra. Sem o recurso no banco, não faz nada. */
+  async function createRecoveryCode(ctx, options) {
+    if (!FM.cloud.status().recovery) return false;
+    const code = newRecoveryCode();
+    const result = await FM.backend.rpcAsUser('set_recovery_code', { p_code: code });
+    if (!result.ok || result.data?.status !== 'ok') {
+      toast('Não deu para criar o código de recuperação agora. Gere em Nuvem, mais tarde.');
+      return false;
+    }
+    ui.hasCode = true;
+    // Enquanto o diálogo está aberto a tela não se redesenha: ao fechar, ela se atualiza.
+    showRecoveryCode(code, { ...options, onClose: () => ctx && ctx.refresh() });
+    return true;
+  }
+
+  /** Esqueceu a senha: e-mail, código e senha nova. Depois entra e já gera um código novo (o antigo foi gasto). */
+  function openRecoverWithCode(ctx, email) {
+    const emailInput = el('input', { class: 'input', type: 'email', inputMode: 'email', autocomplete: 'username', value: email || '', 'data-autofocus': true });
+    const codeInput = el('input', { class: 'input recovery-input', type: 'text', autocomplete: 'off', autocapitalize: 'characters', spellcheck: false, placeholder: 'XXXX-XXXX-XXXX-XXXX' });
+    const passInput = passwordInput('new-password');
+    const emailField = field('E-mail da conta', emailInput);
+    const codeField = field('Código de recuperação', codeInput, { hint: 'O código que você guardou ao criar a conta.' });
+    const passField = field('Senha nova', passInput, { hint: 'Pelo menos 8 caracteres.' });
+    const submitButton = el('button', { class: 'button button-primary', type: 'submit', form: 'form-recuperar-codigo' }, 'Criar senha nova');
+    let handle = null;
+    const send = async () => {
+      [emailField, codeField, passField].forEach((f) => f.setError(null));
+      const mail = emailInput.value.trim();
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(mail)) return emailField.setError('Informe um e-mail válido.');
+      if (codeInput.value.replace(/[^A-Za-z0-9]/g, '').length !== 16) return codeField.setError('O código tem 16 letras e números.');
+      if (passInput.value.length < 8) return passField.setError('Use pelo menos 8 caracteres.');
+      submitButton.disabled = true;
+      const result = await FM.backend.rpc('reset_password_with_code', { p_email: mail, p_code: codeInput.value, p_new_password: passInput.value });
+      submitButton.disabled = false;
+      if (!result.ok || result.data?.status !== 'ok') {
+        const code = result.data?.code;
+        if (code === 'invalid_recovery_code') return codeField.setError('E-mail ou código incorretos.');
+        if (code === 'over_request_rate_limit') return codeField.setError('Muitas tentativas. Espere uma hora e tente de novo.');
+        if (code === 'weak_password') return passField.setError('Use pelo menos 8 caracteres.');
+        return codeField.setError(errorText(result));
+      }
+      const entered = await FM.backend.signIn(mail, passInput.value);
+      handle.close();
+      if (!entered.ok) {
+        toast('Senha trocada. Entre com a senha nova.');
+        ui.mode = 'signin';
+        ui.prefill = mail;
+        ctx.refresh();
+        return;
+      }
+      toast('Senha trocada. Você entrou.');
+      ctx.refresh();
+      FM.cloud.syncNow();
+      // O código usado não vale mais: já entrega um novo.
+      createRecoveryCode(ctx, { title: 'Seu novo código de recuperação' });
+    };
+    handle = openDialog({
+      title: 'Esqueci minha senha',
+      description: 'Use o código de recuperação que você guardou ao criar a conta.',
+      body: el('form', { class: 'form', id: 'form-recuperar-codigo', noValidate: true, onsubmit: (event) => { event.preventDefault(); send(); } }, emailField, codeField, passField, showPasswordToggle(passInput)),
+      footer: submitButton,
+    });
+  }
+
+  /** Seção "Código de recuperação" da conta logada. */
+  function recoverySection(ctx) {
+    if (!FM.cloud.status().recovery) return null;
+    if (ui.hasCode === undefined) {
+      ui.hasCode = null;
+      FM.backend.rpcAsUser('has_recovery_code', {}).then((r) => {
+        if (r.ok) {
+          ui.hasCode = r.data === true;
+          ctx.refresh();
+        }
+      });
+    }
+    const missing = ui.hasCode === false;
+    return el(
+      'section',
+      { class: `band card${missing ? ' recovery-missing' : ''}` },
+      el('div', { class: 'band-head' },
+        el('h2', {}, 'Código de recuperação'),
+        el('p', { class: 'chart-sub' }, missing
+          ? 'Esta conta ainda não tem código. Sem ele, quem esquecer a senha perde o acesso à nuvem. Gere agora e guarde.'
+          : 'Se esquecer a senha, é com ele que você cria outra. Perdeu o código? Gere um novo: o anterior deixa de valer.')),
+      el('div', { class: 'action-list' },
+        el('button', { class: `button${missing ? ' button-primary' : ''}`, type: 'button', onclick: () => createRecoveryCode(ctx) }, missing ? 'Gerar meu código' : 'Gerar código novo')),
     );
   }
 
@@ -316,6 +456,7 @@
           el('li', {}, 'Na tela de boas-vindas, toque em ', el('strong', {}, 'Já tenho conta'), '.'),
           el('li', {}, 'Entre com ', el('strong', {}, user?.email || 'o seu e-mail'), ' e a sua senha. Tudo volta.')),
       ),
+      recoverySection(ctx),
       el(
         'section',
         { class: 'band card' },
@@ -331,6 +472,7 @@
               confirmLabel: 'Sair',
               onConfirm: async () => {
                 await FM.cloud.signOut();
+                ui.hasCode = undefined;
                 toast('Você saiu da conta. Os lançamentos continuam neste aparelho.');
                 ctx.refresh();
               },

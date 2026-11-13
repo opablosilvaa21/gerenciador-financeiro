@@ -279,7 +279,8 @@
           el(
             'div',
             { class: 'welcome-actions' },
-            el('button', { class: 'button button-primary', type: 'submit' }, 'Começar do zero'),
+            el('button', { class: 'button button-primary', type: 'button', dataset: { fk: 'montar-mes' }, onclick: () => FM.setup.open(ctx) }, 'Montar meu mês em 1 minuto'),
+            el('button', { class: 'button', type: 'submit' }, 'Começar do zero'),
             el('button', {
               class: 'button',
               type: 'button',
@@ -464,6 +465,7 @@
   });
   FM.backend.onAuthChange(() => updateCloudChip(FM.cloud.status()));
   FM.cloud.start(store);
+  FM.notifications.start(store);
   FM.telemetry.onChange(() => render({ keepFocus: true }));
 
   ctx.params = parseHash().params;

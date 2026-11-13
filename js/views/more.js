@@ -14,6 +14,25 @@
     const nameField = field('Nome', nameInput);
     const initialField = field('Saldo inicial', initialInput, { class: 'field-money', hint: 'Quanto havia nela antes do primeiro lançamento. Pode ser negativo.' });
 
+    // Cartão de crédito: dias de fechamento e vencimento, e o limite.
+    const dayInput = (value) => el('input', { class: 'input input-short', type: 'number', min: 1, max: 31, inputMode: 'numeric', value: value ?? '' });
+    const closingInput = dayInput(account?.closingDay);
+    const dueInput = dayInput(account?.dueDay);
+    const limitInput = el('input', { class: 'input input-money', type: 'text', inputMode: 'decimal', placeholder: 'Opcional', value: account?.limit ? money.formatPlain(account.limit) : '' });
+    const closingField = field('Dia em que a fatura fecha', closingInput);
+    const dueField = field('Dia em que vence', dueInput);
+    const limitField = field('Limite do cartão', limitInput, { class: 'field-money', hint: 'Opcional. Mostra quanto do limite ainda está livre.' });
+    const cardFields = el('div', { class: 'form' }, el('div', { class: 'form-row' }, closingField, dueField), limitField);
+    const syncType = () => {
+      const isCard = typeSelect.value === 'cartao';
+      cardFields.hidden = !isCard;
+      initialField.querySelector('label').textContent = isCard ? 'Fatura em aberto hoje' : 'Saldo inicial';
+      const hint = initialField.querySelector('.field-hint');
+      if (hint) hint.textContent = isCard ? 'Se o cartão já tem compras não pagas, escreva o valor com sinal de menos (ex.: -350,00). Senão, deixe 0.' : 'Quanto havia nela antes do primeiro lançamento. Pode ser negativo.';
+    };
+    typeSelect.addEventListener('change', syncType);
+    syncType();
+
     const submit = () => {
       if (!nameInput.value.trim()) {
         nameField.setError('Dê um nome para a carteira.');
@@ -27,14 +46,28 @@
         initialInput.focus();
         return;
       }
+      const data = { name: nameInput.value.trim(), type: typeSelect.value, initial: parsed.cents };
+      if (data.type === 'cartao') {
+        const closing = Number(closingInput.value);
+        const due = Number(dueInput.value);
+        closingField.setError(Number.isInteger(closing) && closing >= 1 && closing <= 31 ? null : 'Use um dia de 1 a 31.');
+        dueField.setError(Number.isInteger(due) && due >= 1 && due <= 31 ? null : 'Use um dia de 1 a 31.');
+        if (!(closing >= 1 && closing <= 31 && due >= 1 && due <= 31) || !Number.isInteger(closing) || !Number.isInteger(due)) return;
+        const limit = limitInput.value.trim() ? money.parse(limitInput.value) : { cents: 0 };
+        if (limit.error || limit.cents < 0) {
+          limitField.setError(limit.error || 'O limite não pode ser negativo.');
+          return;
+        }
+        Object.assign(data, { closingDay: closing, dueDay: due, limit: limit.cents });
+      }
       handle.close();
-      store.saveAccount(account?.id ?? null, { name: nameInput.value.trim(), type: typeSelect.value, initial: parsed.cents });
+      store.saveAccount(account?.id ?? null, data);
       ctx.notify(account ? 'Carteira alterada' : 'Carteira criada');
     };
 
     const handle = openDialog({
       title: account ? 'Editar carteira' : 'Nova carteira',
-      body: el('form', { class: 'form', id: 'form-carteira', noValidate: true, onsubmit: (event) => { event.preventDefault(); submit(); } }, nameField, field('Tipo', typeSelect), initialField),
+      body: el('form', { class: 'form', id: 'form-carteira', noValidate: true, onsubmit: (event) => { event.preventDefault(); submit(); } }, nameField, field('Tipo', typeSelect), cardFields, initialField),
       footer: [
         account && el('button', {
           class: 'button button-ghost-danger push-left',
@@ -78,6 +111,7 @@
         ),
         el('div', { class: 'account-values' }, el('strong', {}, money.format(now)), now !== forecast && el('small', {}, `${money.format(forecast)} no fim do mês`)),
         el('button', { class: 'link-button', type: 'button', onclick: () => ctx.go('lancamentos', { carteira: account.id }) }, 'Ver lançamentos'),
+        FM.cards.isCard(account) && FM.cardUi.summary(ctx, account),
       );
     });
 
@@ -424,6 +458,30 @@
           el('button', { class: 'button', type: 'button', onclick: () => pickFile('.csv,text/csv', (text, name) => openStatementImport(ctx, text, name)) }, icon('upload'), 'Importar extrato em CSV'),
         ),
         el('p', { class: 'field-hint' }, 'O CSV precisa de colunas de data, descrição e valor. Valor negativo vira despesa e positivo vira receita. Linhas iguais às que já existem ficam de fora.'),
+      ),
+      el(
+        'section',
+        { class: 'band card' },
+        el('div', { class: 'band-head' },
+          el('h2', {}, 'Avisos no celular'),
+          el('p', { class: 'chart-sub' }, 'Contas que vencem hoje ou amanhã, faturas de cartão e orçamentos perto do limite. No Android com o app instalado, os avisos chegam mesmo com o app fechado; nos outros aparelhos, quando o app é aberto.')),
+        !FM.notifications.supported()
+          ? el('p', { class: 'field-hint' }, 'Este navegador não mostra avisos. Instale o app pela tela inicial para usar.')
+          : FM.notifications.permission() === 'denied'
+            ? el('p', { class: 'field-hint' }, 'Os avisos estão bloqueados nas configurações do navegador para este site. Libere lá para ligar aqui.')
+            : segmented('avisos', 'Avisos no celular', [
+                { value: 'on', label: 'Ligados' },
+                { value: 'off', label: 'Desligados' },
+              ], FM.notifications.enabled() ? 'on' : 'off', async (value) => {
+                if (value === 'off') {
+                  await FM.notifications.disable();
+                  toast('Avisos desligados');
+                } else {
+                  const result = await FM.notifications.enable();
+                  toast(result.ok ? 'Avisos ligados' : 'O navegador não deu permissão para avisos');
+                }
+                ctx.refresh();
+              }),
       ),
       FM.telemetry.enabled() && el(
         'section',

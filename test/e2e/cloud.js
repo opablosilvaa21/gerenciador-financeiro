@@ -20,7 +20,7 @@ const delay = (ms) => new Promise((r) => setTimeout(r, ms));
 
 /* ---------- O Supabase de mentira ---------- */
 
-const db = { users: new Map(), vaults: new Map(), autoconfirm: true, recovers: [], passwordChanges: 0, deleted: [], tableMissing: false, noCreateAccount: false, created: 0 };
+const db = { codes: new Map(), resets: 0, users: new Map(), vaults: new Map(), autoconfirm: true, recovers: [], passwordChanges: 0, deleted: [], tableMissing: false, noCreateAccount: false, created: 0 };
 const b64 = (obj) => Buffer.from(JSON.stringify(obj)).toString('base64url');
 const tokenFor = (user) => `${b64({ alg: 'none' })}.${b64({ sub: user.id, email: user.email, exp: Math.floor(Date.now() / 1000) + 3600 })}.assinatura`;
 const session = (user) => ({ access_token: tokenFor(user), refresh_token: `renovar-${user.id}`, expires_in: 3600, token_type: 'bearer', user: { id: user.id, email: user.email } });
@@ -88,11 +88,28 @@ async function fakeSupabase(request, response, url) {
     db.created++;
     return json(200, { status: 'ok' });
   }
+  // Código de recuperação (no banco de verdade fica só embaralhado; aqui basta guardar).
+  const normalizeCode = (code) => String(code || '').replace(/[^A-Za-z0-9]/g, '').toUpperCase();
+  if (route === '/rest/v1/rpc/reset_password_with_code') {
+    if (String(body.p_new_password || '').length < 8) return json(200, { status: 'error', code: 'weak_password' });
+    const user = db.users.get(String(body.p_email || '').trim().toLowerCase());
+    if (!user || !db.codes.has(user.id) || db.codes.get(user.id) !== normalizeCode(body.p_code)) return json(200, { status: 'error', code: 'invalid_recovery_code' });
+    user.password = body.p_new_password;
+    db.codes.delete(user.id);
+    db.resets++;
+    return json(200, { status: 'ok' });
+  }
   if (route === '/rest/v1/vaults' && db.tableMissing) return json(404, { code: 'PGRST205', message: 'tabela não encontrada' });
 
   const user = userFromToken(request.headers.authorization);
   if (!user) return json(401, { code: 'PGRST301', message: 'JWT inválido' });
 
+  if (route === '/rest/v1/rpc/set_recovery_code') {
+    if (normalizeCode(body.p_code).length !== 16) return json(200, { status: 'error', code: 'invalid_recovery_code' });
+    db.codes.set(user.id, normalizeCode(body.p_code));
+    return json(200, { status: 'ok' });
+  }
+  if (route === '/rest/v1/rpc/has_recovery_code') return json(200, db.codes.has(user.id));
   if (route === '/auth/v1/user' && request.method === 'PUT') {
     user.password = body.password;
     db.passwordChanges++;
@@ -230,6 +247,7 @@ const shot = async (page, name) => {
   URL_APP = `http://localhost:${server.address().port}/`;
   browser = await puppeteer.launch({ executablePath: CHROME, headless: true, args: ['--no-first-run', '--hide-scrollbars'] });
   const EMAIL = 'maria@exemplo.com';
+  let recoveryCode = '';
   const PASSWORD = 'senha-forte-123';
 
   console.log('\nAntes de o banco estar pronto');
@@ -269,7 +287,16 @@ const shot = async (page, name) => {
     await shot(a.page, 'nuvem-1-criar-conta.png');
     await fillAuth(a.page, EMAIL, PASSWORD);
     await clickText(a.page, 'Criar conta e guardar');
+    // A conta nova já vem com o código de recuperação, que só fecha depois de a pessoa confirmar que guardou.
+    await a.page.waitForSelector('dialog[open] .recovery-code');
+    recoveryCode = await a.page.$eval('dialog[open] .recovery-code', (n) => n.textContent);
+    assert.match(recoveryCode, /^[A-Z2-9]{4}(-[A-Z2-9]{4}){3}$/);
+    assert.equal(await a.page.$eval('dialog[open] .dialog-foot .button-primary', (n) => n.disabled), true, 'só fecha depois de confirmar');
+    await shot(a.page, 'nuvem-0-codigo.png');
+    await a.page.click('dialog[open] input[type=checkbox]');
+    await clickText(a.page, 'Pronto', 'dialog[open] .dialog-foot');
     await waitFor(() => cloudDescs(EMAIL)?.length === 3, 'os 3 lançamentos na nuvem');
+    assert.equal(db.codes.get(db.users.get(EMAIL).id), recoveryCode.replace(/-/g, ''), 'o código ficou guardado na conta');
     assert.equal(db.created, 1, 'a conta foi criada pela função create_account, sem e-mail');
     assert.deepEqual(cloudDescs(EMAIL), ['Aluguel', 'Farmácia', 'Mercado']);
     await a.page.waitForFunction(() => /Tudo guardado na nuvem/.test(document.querySelector('.view-cloud').textContent));
@@ -388,12 +415,41 @@ const shot = async (page, name) => {
     await context.close();
   });
 
-  await step('sem e-mail de recuperação configurado, não oferece "Esqueci minha senha" e pede para anotar a senha', async () => {
+  await step('com o código de recuperação disponível, o cadastro não pede mais para anotar a senha', async () => {
     const { context, page } = await newPhone('#/nuvem');
-    assert.match(await page.$eval('.cloud-form', (n) => n.textContent), /Anote a senha/);
+    await page.waitForFunction(() => FM.cloud.status().recovery);
+    await page.evaluate(() => FM.app.ctx.refresh());
+    assert.doesNotMatch(await page.$eval('.cloud-form', (n) => n.textContent), /Anote a senha/);
     await clickText(page, 'Já tenho conta');
     await page.waitForSelector('.cloud-form');
-    assert.doesNotMatch(await page.$eval('.cloud-form', (n) => n.textContent), /Esqueci minha senha/);
+    assert.match(await page.$eval('.cloud-form', (n) => n.textContent), /Esqueci minha senha/);
+    await context.close();
+  });
+
+  await step('"Esqueci minha senha" com o código de recuperação: código errado é recusado, o certo troca a senha e gera outro', async () => {
+    const { context, page } = await newPhone('#/nuvem');
+    await clickText(page, 'Já tenho conta');
+    await page.waitForSelector('.cloud-form');
+    await clickText(page, 'Esqueci minha senha');
+    await page.waitForSelector('dialog[open] #form-recuperar-codigo');
+    await page.type('dialog[open] input[type=email]', EMAIL);
+    await page.type('dialog[open] .recovery-input', 'AAAA-BBBB-CCCC-DDDD');
+    await page.type('dialog[open] input[type=password]', 'senha-recuperada-1');
+    await clickText(page, 'Criar senha nova', 'dialog[open] .dialog-foot');
+    await page.waitForFunction(() => /incorretos/.test(document.querySelector('dialog[open]').textContent));
+    await page.$eval('dialog[open] .recovery-input', (n) => { n.value = ''; });
+    await page.type('dialog[open] .recovery-input', recoveryCode.toLowerCase().replace(/-/g, ' '));
+    await clickText(page, 'Criar senha nova', 'dialog[open] .dialog-foot');
+    await page.waitForSelector('dialog[open] .recovery-code');
+    const fresh = await page.$eval('dialog[open] .recovery-code', (n) => n.textContent);
+    assert.notEqual(fresh, recoveryCode, 'o código usado não vale mais: vem um novo');
+    assert.equal(db.resets, 1);
+    assert.equal(db.users.get(EMAIL).password, 'senha-recuperada-1');
+    assert.equal(await page.evaluate(() => FM.cloud.signedIn()), true);
+    await page.click('dialog[open] input[type=checkbox]');
+    await clickText(page, 'Pronto', 'dialog[open] .dialog-foot');
+    // Volta a senha usada pelos passos seguintes.
+    db.users.get(EMAIL).password = PASSWORD;
     await context.close();
   });
 

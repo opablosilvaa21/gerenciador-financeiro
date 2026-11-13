@@ -27,6 +27,14 @@ conta, que se atualiza sozinha: se trocar, perder ou quebrar o celular, basta en
   e a receber, orçamentos apertados e entradas e saídas em 12 meses.
 - **Lançamentos:** despesas, receitas e transferências, com busca, filtros, ordenação, ações em lote e
   exportação em CSV.
+- **Cartão de crédito:** carteira do tipo cartão com dia de fechamento, vencimento e limite. Mostra a fatura aberta,
+  a fechada e as atrasadas, e "Pagar fatura" registra o pagamento como transferência (a compra conta no mês em que foi
+  feita; o pagamento não conta de novo). No formulário, diz em qual fatura a compra cai.
+- **Lembretes e avisos:** o Início mostra o que vence hoje e amanhã, faturas perto do vencimento e orçamentos acima de
+  85%. Em Ajustes dá para receber isso como notificação do celular; no Android com o app instalado, chega mesmo com o
+  app fechado (Periodic Background Sync), e nos outros aparelhos quando o app é aberto.
+- **Montar meu mês em 1 minuto:** na primeira abertura, saldo, salário, aluguel e limites de mercado e lazer viram
+  contas fixas e orçamentos.
 - **Parcelas e repetições:** compra parcelada com a soma exata em centavos e conta que se repete todo mês.
 - **Carteiras:** saldo de cada uma, transferências e evolução mês a mês.
 - **Orçamentos:** limite por categoria, editado na própria linha, com sugestão pela média de gastos.
@@ -94,6 +102,13 @@ tudo o que o app guarda, no mesmo formato do backup em JSON.
 - **Sair e excluir.** Sair da conta mantém os lançamentos no aparelho. Excluir a conta apaga a conta, o cofre e o
   histórico.
 
+- **Código de recuperação.** Ao criar a conta, o app gera um código (16 letras e números) e só fecha depois de a
+  pessoa confirmar que guardou. Com ele, "Esqueci minha senha" cria outra senha; o código vale uma vez, as sessões
+  abertas caem e um código novo é entregue. No banco fica só o código embaralhado (bcrypt), com limite de 5 erros por
+  hora por e-mail. Cadastro: até 5 contas por hora por conexão e 300 no total.
+- **Projeto sempre acordado.** O Supabase grátis pausa depois de uma semana sem uso; `.github/workflows/manter-ativo.yml`
+  chama a função `keep_alive` todo dia. O GitHub desliga tarefas agendadas após 60 dias sem commits (e avisa por
+  e-mail): basta reativar em Actions.
 - **Sem e-mail.** A conta é criada pela função `create_account`, já confirmada: o e-mail embutido do Supabase só
   entrega para a equipe do projeto. Por isso, enquanto `emailRecovery` estiver `false` em `js/config.js`, o app não
   oferece "Esqueci minha senha" e pede para anotar a senha. Com um serviço de e-mail próprio configurado no
@@ -160,6 +175,7 @@ npm run test:e2e     # usa o app no Chrome: digita, clica, erra, desfaz, recarre
 npm run test:mobile  # simula um celular: toque, abas, instalação e abrir com o servidor desligado
 npm run test:installs  # simula a contagem de instalações e o painel, com um Supabase de mentira
 npm run test:cloud   # simula o backup na nuvem com três celulares: celular novo, sem internet, junção
+npm run test:novidades  # montar o mês, cartão de crédito, lembretes e avisos do celular
 npm run screenshots  # tira fotos das telas em 375 px e no computador
 ```
 

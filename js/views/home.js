@@ -50,6 +50,9 @@
     const today = ctx.store.today();
     const isCurrent = dates.monthOf(today) === ctx.month;
     const list = q.pending(state, today, { limit: 6, month: isCurrent ? null : ctx.month });
+    // Faturas de cartão com algo a pagar e que vencem neste mês (ou já venceram).
+    const lastDay = dates.dateIn(ctx.month, 31);
+    const bills = FM.cards.allBillsToPay(state, today).filter((b) => b.status !== 'open' || b.due <= lastDay).filter((b) => b.due <= lastDay);
     return el(
       'section',
       { class: 'column card' },
@@ -59,8 +62,8 @@
         el('h2', {}, 'A pagar e a receber'),
         el('button', { class: 'link-button', type: 'button', onclick: () => ctx.go('lancamentos', { situacao: 'pending', mes: 'todos' }) }, 'Ver todos'),
       ),
-      list.length
-        ? el('ul', { class: 'tx-list' }, list.map((p) => common.txLine(ctx, p.tx)))
+      list.length || bills.length
+        ? el('ul', { class: 'tx-list' }, bills.map((b) => FM.cardUi.pendingLine(ctx, b)), list.map((p) => common.txLine(ctx, p.tx)))
         : common.emptyState('Nada pendente', 'Lançamentos com data futura ou marcados como não pagos aparecem aqui.', null, 'check'),
     );
   }
@@ -128,6 +131,26 @@
     );
   }
 
+  /** Lembretes de hoje e amanhã no topo do Início: contas, faturas e orçamentos apertados. */
+  function remindersSection(ctx) {
+    const list = FM.reminders.reminders(ctx.store.state, ctx.store.today());
+    if (!list.length || dates.monthOf(ctx.store.today()) !== ctx.month) return null;
+    const shown = list.slice(0, 3);
+    return el(
+      'section',
+      { class: 'band card reminders', 'aria-label': 'Lembretes' },
+      el('div', { class: 'column-head' },
+        el('h2', {}, 'Lembretes'),
+        !FM.notifications.enabled() && FM.notifications.supported() && el('button', { class: 'link-button', type: 'button', onclick: () => ctx.go('ajustes') }, 'Receber no celular')),
+      el('ul', { class: 'reminder-list' }, shown.map((r) =>
+        el('li', { class: `reminder${r.urgent ? ' is-urgent' : ''}` },
+          el('a', { href: r.url },
+            el('strong', {}, r.title),
+            el('span', {}, r.body))))),
+      list.length > shown.length && el('p', { class: 'tx-sub' }, `E mais ${list.length - shown.length}.`),
+    );
+  }
+
   function home(ctx) {
     const { state } = ctx.store;
     const summary = q.monthSummary(state, ctx.month);
@@ -138,6 +161,7 @@
       'div',
       { class: 'view view-home' },
       common.pageHead(dates.monthLabel(ctx.month), { monthNav: common.monthNav(ctx), actions: common.newButton(ctx) }),
+      remindersSection(ctx),
       el(
         'div',
         { class: 'hero' },

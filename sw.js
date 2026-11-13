@@ -31,6 +31,8 @@ const FILES = [
   'js/core/store.js',
   'js/core/queries.js',
   'js/core/demo.js',
+  'js/core/cards.js',
+  'js/core/reminders.js',
   'js/core/sync.js',
   'js/core/device.js',
   'js/ui/dom.js',
@@ -39,10 +41,13 @@ const FILES = [
   'js/ui/note.js',
   'js/ui/common.js',
   'js/ui/tx-form.js',
+  'js/ui/card.js',
+  'js/ui/setup.js',
   'js/ui/pwa.js',
   'js/ui/backend.js',
   'js/ui/telemetry.js',
   'js/ui/cloud.js',
+  'js/ui/reminders.js',
   'js/views/home.js',
   'js/views/transactions.js',
   'js/views/planning.js',
@@ -68,6 +73,49 @@ self.addEventListener('activate', (event) => {
       .then((keys) => Promise.all(keys.filter((key) => key.startsWith('sobra-') && key !== CACHE).map((key) => caches.delete(key))))
       .then(() => self.clients.claim()),
   );
+});
+
+/* ---------- Avisos com o app fechado ---------- */
+
+// O app deixa pronto, em Cache Storage, o plano dos próximos 7 dias (js/ui/reminders.js). Onde o aparelho deixa,
+// o navegador acorda este service worker cerca de uma vez por dia e ele avisa o que é de hoje e ainda não saiu.
+const REMINDERS = 'lembretes-sobra';
+
+async function readReminders(url, fallback) {
+  const response = await (await caches.open(REMINDERS)).match(url);
+  return response ? response.json() : fallback;
+}
+
+async function notifyFromPlan() {
+  const plan = await readReminders('lembretes/plano.json', { items: [] });
+  const sent = await readReminders('lembretes/enviados.json', {});
+  const now = new Date();
+  const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+  for (const item of plan.items || []) {
+    if (item.day !== today || sent[item.key]) continue;
+    await self.registration.showNotification(item.title, { body: item.body, tag: item.key, icon: 'assets/icone-192.png', badge: 'assets/icone-192.png', data: { url: item.url } });
+    sent[item.key] = today;
+  }
+  await (await caches.open(REMINDERS)).put('lembretes/enviados.json', new Response(JSON.stringify(sent), { headers: { 'Content-Type': 'application/json' } }));
+}
+
+self.addEventListener('periodicsync', (event) => {
+  if (event.tag === 'lembretes') event.waitUntil(notifyFromPlan().catch(() => {}));
+});
+
+// Tocar no aviso abre o app (ou traz a janela aberta para a frente) na tela certa.
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  const target = new URL(event.notification.data?.url || '#/inicio', self.registration.scope).href;
+  event.waitUntil((async () => {
+    const windows = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+    const open = windows.find((w) => w.url.startsWith(self.registration.scope));
+    if (open) {
+      await open.focus();
+      return open.navigate(target);
+    }
+    return self.clients.openWindow(target);
+  })());
 });
 
 self.addEventListener('fetch', (event) => {
