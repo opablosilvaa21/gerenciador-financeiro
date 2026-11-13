@@ -35,6 +35,8 @@ const server = http.createServer((request, response) => {
   let body = fs.readFileSync(file);
   if (file.endsWith('index.html') && newVersionMark) body = body.toString().replace('</head>', `<meta name="versao" content="${newVersionMark}"></head>`);
   if (file.endsWith('sw.js')) body = body.toString().replace("'__BUILD__'", `'${swBuild}'`);
+  // Sem Supabase: este teste é sobre o app no celular, e não pode depender da rede nem mexer no banco de verdade.
+  if (url.pathname === '/js/config.js') body = body.toString().replace(/supabaseUrl: '[^']*'/, "supabaseUrl: ''").replace(/supabaseKey: '[^']*'/, "supabaseKey: ''");
   response.writeHead(200, { 'Content-Type': TYPES[path.extname(file)] || 'application/octet-stream', 'Cache-Control': 'no-store' });
   response.end(body);
 });

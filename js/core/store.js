@@ -218,6 +218,19 @@
         });
       },
 
+      /**
+       * Troca tudo pela versão que veio da nuvem. Não entra no "Desfazer": desfazer depois de sincronizar
+       * traria de volta a versão antiga e a mandaria para a nuvem por cima da nova.
+       */
+      adopt(next) {
+        if (validateState(next).length) throw new Error('Dados da nuvem inválidos');
+        state = JSON.parse(JSON.stringify(next));
+        undoStack.length = 0;
+        generateRecurringInto(state);
+        save();
+        notify();
+      },
+
       finishOnboarding(initialBalance) {
         commit('Início', (s) => {
           s.onboarded = true;

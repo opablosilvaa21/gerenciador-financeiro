@@ -31,6 +31,7 @@ const FILES = [
   'js/core/store.js',
   'js/core/queries.js',
   'js/core/demo.js',
+  'js/core/sync.js',
   'js/core/device.js',
   'js/ui/dom.js',
   'js/ui/motion.js',
@@ -41,11 +42,13 @@ const FILES = [
   'js/ui/pwa.js',
   'js/ui/backend.js',
   'js/ui/telemetry.js',
+  'js/ui/cloud.js',
   'js/views/home.js',
   'js/views/transactions.js',
   'js/views/planning.js',
   'js/views/more.js',
   'js/views/admin.js',
+  'js/views/cloud.js',
   'js/app.js',
 ];
 

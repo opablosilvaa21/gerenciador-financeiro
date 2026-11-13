@@ -16,9 +16,10 @@ próprio e sem precisar de internet.
 
 No computador, também dá para dar dois cliques em `index.html`; nesse caso não há instalação nem modo offline.
 
-Os dados financeiros ficam só no aparelho e nunca são enviados para fora. O computador e o celular não se falam, e o app instalado
-pode ter dados separados dos do navegador. Limpar os dados do navegador apaga o Sobra, então baixe um backup de vez
-em quando em **Ajustes**. Para levar os dados a outro lugar, restaure esse backup lá.
+Os dados financeiros ficam no aparelho. Quem cria uma conta em **Nuvem** passa a ter também uma cópia guardada na
+conta, que se atualiza sozinha: se trocar, perder ou quebrar o celular, basta entrar com a mesma conta no aparelho novo
+("Já tenho conta", na tela de boas-vindas) e tudo volta. Sem conta, nada sai do aparelho, e o backup em arquivo, em
+**Ajustes**, continua disponível.
 
 ## O que dá para fazer
 
@@ -76,6 +77,32 @@ Decisões que valem saber:
   trocar número de versão. Sem internet, ou se a rede demorar mais de 3 segundos, usa a última cópia. Ao criar um
   arquivo que a página carrega, inclua-o na lista de `sw.js`; o `npm test` avisa se faltar.
 
+## Backup na nuvem
+
+Opcional, com conta de e-mail e senha (Supabase Auth). Cada conta tem um "cofre" na tabela `vaults`: uma linha com
+tudo o que o app guarda, no mesmo formato do backup em JSON.
+
+- **Sozinho.** Cada alteração sobe alguns segundos depois. Sem internet, fica pendente e sobe quando a conexão voltar.
+  Ao abrir o app, ao voltar para ele e a cada 5 minutos, ele confere se outro aparelho mudou algo.
+- **Dois aparelhos sem perder nada.** Cada gravação diz qual versão do cofre viu por último; se outro aparelho gravou
+  antes, o app junta os dois registro por registro (`js/core/sync.js`) e tenta de novo. Lançamento novo nos dois
+  lados fica; apagado de um lado sai do outro; a conta fixa do mês criada nos dois aparelhos vira uma só.
+- **Aparelho que já tinha dados.** Na primeira vez numa conta que também tem dados, a pessoa escolhe: juntar
+  (recomendado), usar os da nuvem ou manter os do aparelho.
+- **Só o dono.** Regras do banco (RLS) deixam cada pessoa ler e gravar só o próprio cofre. O servidor guarda as 5
+  últimas versões de cada cofre (`private.vault_history`), fora da API, para recuperar dados se algo der errado.
+- **Sair e excluir.** Sair da conta mantém os lançamentos no aparelho. Excluir a conta apaga a conta, o cofre e o
+  histórico.
+
+- **Sem e-mail.** A conta é criada pela função `create_account`, já confirmada: o e-mail embutido do Supabase só
+  entrega para a equipe do projeto. Por isso, enquanto `emailRecovery` estiver `false` em `js/config.js`, o app não
+  oferece "Esqueci minha senha" e pede para anotar a senha. Com um serviço de e-mail próprio configurado no
+  Supabase, basta mudar para `true`.
+- **Liga sozinha.** A Nuvem só aparece quando o banco tem a tabela `vaults`. Aplicada a migration, ela aparece para
+  todo mundo na abertura seguinte, sem publicar o app de novo.
+
+Migration: `supabase/migrations/20261113120000_vaults.sql` (cole no SQL Editor do Supabase e rode).
+
 ## Contagem de instalações
 
 Para saber quantos aparelhos usam o app, e quais, o Sobra pode registrar cada aparelho em uma tabela `installs` no
@@ -111,6 +138,7 @@ npm install          # só para os testes abaixo
 npm run test:e2e     # usa o app no Chrome: digita, clica, erra, desfaz, recarrega
 npm run test:mobile  # simula um celular: toque, abas, instalação e abrir com o servidor desligado
 npm run test:installs  # simula a contagem de instalações e o painel, com um Supabase de mentira
+npm run test:cloud   # simula o backup na nuvem com três celulares: celular novo, sem internet, junção
 npm run screenshots  # tira fotos das telas em 375 px e no computador
 ```
 
@@ -118,7 +146,10 @@ Se o Chrome estiver em outro lugar, informe o caminho na variável `CHROME_PATH`
 
 ## Limites conhecidos
 
-- Os dados financeiros não sincronizam entre aparelhos; para levar a outro navegador, use backup e restauração.
+- Na nuvem, se o mesmo lançamento for editado em dois aparelhos antes de sincronizar, vale a edição do aparelho que
+  sincronizou por último.
+- Os dados na nuvem não são criptografados de ponta a ponta: ficam protegidos pelas regras do banco, e o
+  administrador do projeto no Supabase consegue acessá-los.
 - Não está nas lojas de aplicativos: a instalação é feita pelo navegador.
 - Os testes de celular rodam em um Chrome simulando o aparelho, não em um iPhone ou Android de verdade.
 - Não há fatura de cartão de crédito: uma compra parcelada é lançada como parcelas mensais.
