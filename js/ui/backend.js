@@ -121,10 +121,22 @@
   }
 
   /**
-   * Cria a conta. Se o projeto não exige confirmar o e-mail, já entra (confirmed: true).
-   * Se exige, o Supabase manda um link que volta para o app (confirmed: false).
+   * Cria a conta. Primeiro pela função create_account do banco, que cria a conta já confirmada (o e-mail embutido
+   * do Supabase não entrega para quem usa o app) e em seguida entra. Sem essa função, usa o cadastro do Supabase:
+   * se o projeto não exige confirmar o e-mail, já entra (confirmed: true); se exige, manda um link (confirmed: false).
    */
   async function signUp(email, password) {
+    const created = await request('/rest/v1/rpc/create_account', { body: { p_email: email, p_password: password } });
+    if (created.ok) {
+      if (created.data?.status !== 'ok') return { ok: false, status: 422, code: created.data?.code || 'validation_failed' };
+      const entered = await signIn(email, password);
+      return entered.ok ? { ok: true, confirmed: true } : entered;
+    }
+    if (created.status !== 404) return { ok: false, status: created.status, code: created.code };
+    return signUpWithEmail(email, password);
+  }
+
+  async function signUpWithEmail(email, password) {
     const result = await request(`/auth/v1/signup?redirect_to=${encodeURIComponent(appUrl())}`, { body: { email, password } });
     if (!result.ok) return { ok: false, status: result.status, code: result.code };
     if (result.data?.access_token) {
@@ -192,6 +204,9 @@
   /** Chamada anônima, usada só para registrar o aparelho. */
   const rpc = (name, body) => request(`/rest/v1/rpc/${name}`, { body, keepalive: true });
 
+  /** Leitura anônima: só para saber se uma tabela existe (404 quando não existe; recusa quando existe). */
+  const probe = (pathAndQuery) => request(`/rest/v1/${pathAndQuery}`, { method: 'GET' });
+
   /* ---------- Volta dos links de e-mail ---------- */
 
   /**
@@ -225,6 +240,7 @@
   FM.backend = {
     configured,
     rpc,
+    probe,
     rpcAsUser,
     selectAsUser,
     signIn,

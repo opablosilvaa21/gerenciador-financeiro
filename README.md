@@ -94,7 +94,14 @@ tudo o que o app guarda, no mesmo formato do backup em JSON.
 - **Sair e excluir.** Sair da conta mantém os lançamentos no aparelho. Excluir a conta apaga a conta, o cofre e o
   histórico.
 
-Migration: `supabase/migrations/20261113120000_vaults.sql`.
+- **Sem e-mail.** A conta é criada pela função `create_account`, já confirmada: o e-mail embutido do Supabase só
+  entrega para a equipe do projeto. Por isso, enquanto `emailRecovery` estiver `false` em `js/config.js`, o app não
+  oferece "Esqueci minha senha" e pede para anotar a senha. Com um serviço de e-mail próprio configurado no
+  Supabase, basta mudar para `true`.
+- **Liga sozinha.** A Nuvem só aparece quando o banco tem a tabela `vaults`. Aplicada a migration, ela aparece para
+  todo mundo na abertura seguinte, sem publicar o app de novo.
+
+Migration: `supabase/migrations/20261113120000_vaults.sql` (cole no SQL Editor do Supabase e rode).
 
 ## Contagem de instalações
 

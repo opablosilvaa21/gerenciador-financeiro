@@ -14,12 +14,13 @@
   const { sync, backend } = FM;
 
   const META_KEY = 'sobra.nuvem';
+  const AVAILABLE_KEY = 'sobra.nuvem.disponivel';
   const BASE_KEY = 'sobra.nuvem.base';
   const PUSH_DELAY_MS = 2500;
   const CHECK_EVERY_MS = 5 * 60 * 1000;
 
-  /** status: off | idle | pending | syncing | offline | error | choice */
-  const view = { status: 'off', lastSync: null, error: null, choice: null };
+  /** status: off | idle | pending | syncing | offline | error | choice. available: o banco já tem a tabela da nuvem. */
+  const view = { status: 'off', lastSync: null, error: null, choice: null, available: readAvailable() };
   const listeners = new Set();
   let store = null;
   let applying = false;
@@ -70,7 +71,33 @@
     listeners.forEach((listener) => listener(view));
   }
 
-  const enabled = () => backend.configured();
+  function readAvailable() {
+    try {
+      return root.localStorage.getItem(AVAILABLE_KEY) === '1';
+    } catch {
+      return false;
+    }
+  }
+
+  /**
+   * A nuvem só aparece quando o banco já tem a tabela dela. Assim o app pode ser publicado antes, e a nuvem
+   * liga sozinha para todo mundo quando a tabela for criada, sem publicar de novo. Sem rede, vale a última resposta.
+   */
+  async function checkAvailable() {
+    if (!backend.configured()) return;
+    const result = await backend.probe('vaults?select=revision&limit=0');
+    if (result.status === 0) return;
+    const available = result.status !== 404;
+    try {
+      root.localStorage.setItem(AVAILABLE_KEY, available ? '1' : '0');
+    } catch {
+      // Sem armazenamento, confere de novo na próxima abertura.
+    }
+    if (available !== view.available) setView({ available });
+    if (available && signedIn()) syncNow();
+  }
+
+  const enabled = () => backend.configured() && view.available;
   const signedIn = () => enabled() && backend.hasSession();
 
   /** A conta mudou desde a última sincronização? Então este aparelho ainda não está ligado a ela. */
@@ -127,7 +154,8 @@
    * Nunca lança exceção: qualquer falha vira um estado na tela, e os dados do aparelho ficam intactos.
    */
   async function cycle() {
-    if (!store || !signedIn()) return setView({ status: 'off' });
+    // Sem a tabela no banco, nada de tentar sincronizar.
+    if (!store || !view.available || !signedIn()) return setView({ status: 'off' });
     if (view.status === 'choice') return undefined;
     setView({ status: 'syncing', error: null });
 
@@ -274,7 +302,8 @@
 
   function start(appStore) {
     store = appStore;
-    if (!enabled()) return;
+    if (!backend.configured()) return;
+    checkAvailable();
     store.subscribe(() => {
       if (applying || !signedIn()) return;
       writeMeta({ dirty: true });

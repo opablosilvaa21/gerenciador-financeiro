@@ -35,6 +35,8 @@ const server = http.createServer((request, response) => {
   let body = fs.readFileSync(file);
   if (file.endsWith('index.html') && newVersionMark) body = body.toString().replace('</head>', `<meta name="versao" content="${newVersionMark}"></head>`);
   if (file.endsWith('sw.js')) body = body.toString().replace("'__BUILD__'", `'${swBuild}'`);
+  // Sem Supabase: este teste é sobre o app no celular, e não pode depender da rede nem mexer no banco de verdade.
+  if (url.pathname === '/js/config.js') body = body.toString().replace(/supabaseUrl: '[^']*'/, "supabaseUrl: ''").replace(/supabaseKey: '[^']*'/, "supabaseKey: ''");
   response.writeHead(200, { 'Content-Type': TYPES[path.extname(file)] || 'application/octet-stream', 'Cache-Control': 'no-store' });
   response.end(body);
 });
@@ -130,7 +132,7 @@ const box = (selector) => page.$eval(selector, (n) => {
   });
   await step('"Mais" abre as outras telas e fica marcada nelas', async () => {
     await tapTab('Mais');
-    assert.deepEqual(await page.$$eval('dialog[open] .more-link', (ns) => ns.map((n) => n.textContent)), ['Carteiras', 'Contas fixas', 'Metas', 'Relatórios', 'Nuvem', 'Ajustes']);
+    assert.deepEqual(await page.$$eval('dialog[open] .more-link', (ns) => ns.map((n) => n.textContent)), ['Carteiras', 'Contas fixas', 'Metas', 'Relatórios', 'Ajustes']);
     await tap('Metas', 'dialog[open]');
     await delay(60);
     assert.equal(await page.$('dialog[open]'), null);

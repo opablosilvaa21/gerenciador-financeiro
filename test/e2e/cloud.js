@@ -20,7 +20,7 @@ const delay = (ms) => new Promise((r) => setTimeout(r, ms));
 
 /* ---------- O Supabase de mentira ---------- */
 
-const db = { users: new Map(), vaults: new Map(), autoconfirm: true, recovers: [], passwordChanges: 0, deleted: [] };
+const db = { users: new Map(), vaults: new Map(), autoconfirm: true, recovers: [], passwordChanges: 0, deleted: [], tableMissing: false, noCreateAccount: false, created: 0 };
 const b64 = (obj) => Buffer.from(JSON.stringify(obj)).toString('base64url');
 const tokenFor = (user) => `${b64({ alg: 'none' })}.${b64({ sub: user.id, email: user.email, exp: Math.floor(Date.now() / 1000) + 3600 })}.assinatura`;
 const session = (user) => ({ access_token: tokenFor(user), refresh_token: `renovar-${user.id}`, expires_in: 3600, token_type: 'bearer', user: { id: user.id, email: user.email } });
@@ -78,6 +78,17 @@ async function fakeSupabase(request, response, url) {
     return json(200, {});
   }
   if (route === '/auth/v1/logout') return json(204);
+  if (route === '/rest/v1/rpc/create_account') {
+    if (db.noCreateAccount) return json(404, { code: 'PGRST202' });
+    const email = String(body.p_email || '').trim().toLowerCase();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return json(200, { status: 'error', code: 'email_address_invalid' });
+    if (String(body.p_password || '').length < 8) return json(200, { status: 'error', code: 'weak_password' });
+    if (db.users.has(email)) return json(200, { status: 'error', code: 'user_already_exists' });
+    db.users.set(email, { id: `u-${db.users.size + 1}`, email, password: body.p_password, confirmed: true });
+    db.created++;
+    return json(200, { status: 'ok' });
+  }
+  if (route === '/rest/v1/vaults' && db.tableMissing) return json(404, { code: 'PGRST205', message: 'tabela não encontrada' });
 
   const user = userFromToken(request.headers.authorization);
   if (!user) return json(401, { code: 'PGRST301', message: 'JWT inválido' });
@@ -130,11 +141,13 @@ const server = http.createServer((request, response) => {
   let content = fs.readFileSync(file);
   // O teste nunca usa o Supabase de verdade.
   if (url.pathname === '/js/config.js') {
-    content = "globalThis.FM = globalThis.FM || {}; FM.config = { appVersion: 'teste', build: '__BUILD__', supabaseUrl: location.origin + '/supabase', supabaseKey: 'sb_publishable_teste' };";
+    content = `globalThis.FM = globalThis.FM || {}; FM.config = { appVersion: 'teste', build: '__BUILD__', emailRecovery: ${emailRecovery}, supabaseUrl: location.origin + '/supabase', supabaseKey: 'sb_publishable_teste' };`;
   }
   response.writeHead(200, { 'Content-Type': TYPES[path.extname(file)] || 'application/octet-stream', 'Cache-Control': 'no-store' });
   response.end(content);
 });
+
+let emailRecovery = false;
 
 /* ---------- Apoio ---------- */
 
@@ -219,6 +232,30 @@ const shot = async (page, name) => {
   const EMAIL = 'maria@exemplo.com';
   const PASSWORD = 'senha-forte-123';
 
+  console.log('\nAntes de o banco estar pronto');
+  await step('sem a tabela no banco, a nuvem não aparece em lugar nenhum e nada quebra', async () => {
+    db.tableMissing = true;
+    const { context, page } = await newPhone();
+    await delay(300);
+    assert.doesNotMatch(await page.evaluate(() => document.body.innerText), /Já tenho conta/);
+    await clickText(page, 'Começar do zero');
+    await page.waitForSelector('.view-home');
+    for (const desc of ['Um', 'Dois', 'Três']) await addExpense(page, desc);
+    await page.reload({ waitUntil: 'networkidle0' });
+    await delay(300);
+    assert.doesNotMatch(await page.$eval('#banners', (n) => n.textContent), /nuvem/i);
+    assert.equal(await page.$$eval('#nav a', (ns) => ns.some((n) => n.textContent.includes('Nuvem'))), false);
+    await page.goto(`${URL_APP}#/nuvem`, { waitUntil: 'networkidle0' });
+    assert.match(await page.evaluate(() => document.body.innerText), /Nuvem indisponível/);
+
+    // A tabela é criada: na próxima abertura a nuvem aparece, sem publicar o app de novo.
+    db.tableMissing = false;
+    await page.goto(URL_APP, { waitUntil: 'networkidle0' });
+    await page.waitForFunction(() => /guarde uma cópia na nuvem/.test(document.querySelector('#banners').textContent));
+    assert.equal(await page.$$eval('#nav a', (ns) => ns.some((n) => n.textContent.includes('Nuvem'))), true);
+    await context.close();
+  });
+
   console.log('\nAtivar o backup');
   const a = await newPhone();
   await step('quem já usa o app recebe o convite e cria a conta em poucos toques', async () => {
@@ -233,6 +270,7 @@ const shot = async (page, name) => {
     await fillAuth(a.page, EMAIL, PASSWORD);
     await clickText(a.page, 'Criar conta e guardar');
     await waitFor(() => cloudDescs(EMAIL)?.length === 3, 'os 3 lançamentos na nuvem');
+    assert.equal(db.created, 1, 'a conta foi criada pela função create_account, sem e-mail');
     assert.deepEqual(cloudDescs(EMAIL), ['Aluguel', 'Farmácia', 'Mercado']);
     await a.page.waitForFunction(() => /Tudo guardado na nuvem/.test(document.querySelector('.view-cloud').textContent));
     assert.equal(await a.page.$eval('.cloud-chip', (n) => n.textContent), 'Na nuvem');
@@ -330,8 +368,9 @@ const shot = async (page, name) => {
     await context.close();
   });
 
-  await step('com confirmação de e-mail ligada: pede para conferir o e-mail e entra pelo link', async () => {
+  await step('com confirmação de e-mail ligada (sem a função de criar conta): pede para conferir o e-mail e entra pelo link', async () => {
     db.autoconfirm = false;
+    db.noCreateAccount = true;
     const { context, page } = await newPhone('#/nuvem');
     await fillAuth(page, 'joao@exemplo.com', PASSWORD);
     await clickText(page, 'Criar conta e guardar');
@@ -345,10 +384,21 @@ const shot = async (page, name) => {
     assert.equal(await page.evaluate(() => location.hash), '#/nuvem', 'os tokens saem do endereço');
     assert.equal(await page.evaluate(() => FM.cloud.signedIn()), true);
     db.autoconfirm = true;
+    db.noCreateAccount = false;
+    await context.close();
+  });
+
+  await step('sem e-mail de recuperação configurado, não oferece "Esqueci minha senha" e pede para anotar a senha', async () => {
+    const { context, page } = await newPhone('#/nuvem');
+    assert.match(await page.$eval('.cloud-form', (n) => n.textContent), /Anote a senha/);
+    await clickText(page, 'Já tenho conta');
+    await page.waitForSelector('.cloud-form');
+    assert.doesNotMatch(await page.$eval('.cloud-form', (n) => n.textContent), /Esqueci minha senha/);
     await context.close();
   });
 
   await step('"Esqueci minha senha": o link do e-mail abre o pedido de senha nova', async () => {
+    emailRecovery = true;
     const { context, page } = await newPhone('#/nuvem');
     await clickText(page, 'Já tenho conta');
     await page.waitForSelector('.cloud-form');
@@ -364,6 +414,7 @@ const shot = async (page, name) => {
     await page.type('dialog[open] input[type=password]', 'outra-senha-456');
     await clickText(page, 'Salvar senha', 'dialog[open]');
     await waitFor(() => db.passwordChanges === 1, 'senha trocada');
+    emailRecovery = false;
     await context.close();
   });
 

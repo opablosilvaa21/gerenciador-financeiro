@@ -90,7 +90,10 @@
     const emailInput = el('input', { class: 'input', type: 'email', autocomplete: 'username', inputMode: 'email', required: true, value: ui.prefill || '' });
     const passInput = passwordInput(signup ? 'new-password' : 'current-password');
     const emailField = field('E-mail', emailInput);
-    const passField = field('Senha', passInput, { hint: signup ? 'Pelo menos 8 caracteres.' : null });
+    const recoverable = FM.config.emailRecovery;
+    const passField = field('Senha', passInput, {
+      hint: signup ? (recoverable ? 'Pelo menos 8 caracteres.' : 'Pelo menos 8 caracteres. Anote a senha: por enquanto ela não pode ser recuperada por e-mail.') : null,
+    });
     const submit = el('button', { class: 'button button-primary', type: 'submit', disabled: ui.busy }, ui.busy ? 'Aguarde…' : signup ? 'Criar conta e guardar' : 'Entrar e recuperar');
 
     const onSubmit = async (event) => {
@@ -147,7 +150,7 @@
       passField,
       showPasswordToggle(passInput),
       el('div', { class: 'action-list' }, submit,
-        !signup && el('button', { class: 'link-button', type: 'button', onclick: () => openRecover(emailInput.value.trim()) }, 'Esqueci minha senha')),
+        !signup && recoverable && el('button', { class: 'link-button', type: 'button', onclick: () => openRecover(emailInput.value.trim()) }, 'Esqueci minha senha')),
     );
   }
 

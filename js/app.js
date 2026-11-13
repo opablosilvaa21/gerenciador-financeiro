@@ -449,7 +449,13 @@
   }
 
   let lastCloudStatus = null;
+  let lastAvailable = FM.cloud.status().available;
   FM.cloud.onChange((view) => {
+    // O banco acabou de confirmar (ou negar) a nuvem: menu, boas-vindas e convite mudam.
+    if (view.available !== lastAvailable) {
+      lastAvailable = view.available;
+      render({ keepFocus: true });
+    }
     updateCloudChip(view);
     renderBanners();
     // A tela da Nuvem mostra o estado: redesenha quando ele muda (sem atrapalhar um formulário aberto).
